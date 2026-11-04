@@ -1,0 +1,118 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <!-- Main window -->
+    <sys:String x:Key="Tip_Pin">Поверх усіх вікон</sys:String>
+    <sys:String x:Key="Tip_Compact">Компактний режим</sys:String>
+    <sys:String x:Key="Tip_Normal">Звичайний режим</sys:String>
+    <sys:String x:Key="Tip_Settings">Налаштування</sys:String>
+    <sys:String x:Key="Tip_Minimize">Згорнути</sys:String>
+    <sys:String x:Key="Tip_Close">Закрити</sys:String>
+    <sys:String x:Key="Tip_Reset">Скинути</sys:String>
+    <sys:String x:Key="Tip_Skip">Пропустити</sys:String>
+    <sys:String x:Key="Tab_Work">Фокус</sys:String>
+    <sys:String x:Key="Tab_Short">Перерва</sys:String>
+    <sys:String x:Key="Tab_Long">Довга</sys:String>
+
+    <!-- Timer state -->
+    <sys:String x:Key="Phase_Work">Фокус</sys:String>
+    <sys:String x:Key="Phase_Short">Коротка перерва</sys:String>
+    <sys:String x:Key="Phase_Long">Довга перерва</sys:String>
+    <sys:String x:Key="Start">Старт</sys:String>
+    <sys:String x:Key="Pause">Пауза</sys:String>
+    <sys:String x:Key="Restart">Заново</sys:String>
+    <sys:String x:Key="Status_Ready">{0} · готово</sys:String>
+    <sys:String x:Key="Status_Paused">{0} · пауза</sys:String>
+    <sys:String x:Key="Status_Finished">Готово · всі сесії виконано</sys:String>
+    <sys:String x:Key="Session_Of">Сесія {0} з {1}</sys:String>
+    <sys:String x:Key="Done_Of">Виконано {0} з {1}</sys:String>
+    <sys:String x:Key="Until">до {0}</sys:String>
+    <sys:String x:Key="Session_Done">Сесію виконано</sys:String>
+    <sys:String x:Key="Left_Label">залишилось {0}</sys:String>
+    <sys:String x:Key="Loops_Unlimited">без обмежень</sys:String>
+    <sys:String x:Key="Loops_Tip">Кількість сесій фокусу до зупинки таймера</sys:String>
+    <sys:String x:Key="Start_Work">Почати фокус</sys:String>
+    <sys:String x:Key="Start_Short">Почати перерву</sys:String>
+    <sys:String x:Key="Start_Long">Почати довгу перерву</sys:String>
+    <sys:String x:Key="Active_Running">{0} триває · {1}</sys:String>
+    <sys:String x:Key="Active_Paused">{0} на паузі · {1}</sys:String>
+    <sys:String x:Key="Edit">Змінити</sys:String>
+    <sys:String x:Key="Edit_Tip">Змінити тривалість цієї фази</sys:String>
+    <sys:String x:Key="All_Done">Усі {0} {1} виконано</sys:String>
+
+    <!-- Notifications and tray -->
+    <sys:String x:Key="Notify_WorkDone_Title">Фокус завершено</sys:String>
+    <sys:String x:Key="Notify_WorkDone_Text">Час відпочити: {0} хв.</sys:String>
+    <sys:String x:Key="Notify_BreakDone_Title">Перерву завершено</sys:String>
+    <sys:String x:Key="Notify_BreakDone_Text">Час повертатися до роботи.</sys:String>
+    <sys:String x:Key="Notify_AllDone_Title">Усі сесії виконано</sys:String>
+    <sys:String x:Key="Notify_AllDone_Text">{0} з {0} — чудова робота!</sys:String>
+    <sys:String x:Key="Tray_Show">Показати</sys:String>
+    <sys:String x:Key="Tray_Exit">Вийти</sys:String>
+    <sys:String x:Key="Tray_AllDone">Pomodoro — усі сесії виконано</sys:String>
+
+    <!-- Settings -->
+    <sys:String x:Key="Settings_Title">Налаштування</sys:String>
+    <sys:String x:Key="Nav_Timer">Таймер</sys:String>
+    <sys:String x:Key="Nav_Sound">Звук</sys:String>
+    <sys:String x:Key="Nav_Look">Вигляд</sys:String>
+    <sys:String x:Key="Nav_System">Система</sys:String>
+    <sys:String x:Key="Label_Work">Фокус</sys:String>
+    <sys:String x:Key="Label_Short">Коротка перерва</sys:String>
+    <sys:String x:Key="Label_Long">Довга перерва</sys:String>
+    <sys:String x:Key="Min">хв</sys:String>
+    <sys:String x:Key="Hours">год</sys:String>
+    <sys:String x:Key="Label_Cycles">Сесій до довгої перерви</sys:String>
+    <sys:String x:Key="AutoBreaks">Автоматично починати перерву</sys:String>
+    <sys:String x:Key="AutoWork">Автоматично починати фокус</sys:String>
+    <sys:String x:Key="LimitSessions">Обмежити кількість сесій</sys:String>
+    <sys:String x:Key="TotalSessions">Усього сесій фокусу</sys:String>
+    <sys:String x:Key="Plan_End">Завершиться о {0}</sys:String>
+    <sys:String x:Key="Plan_Duration">{0} {1} · {2} з перервами, якщо почати зараз</sys:String>
+    <sys:String x:Key="SoundEnabled">Звуковий сигнал</sys:String>
+    <sys:String x:Key="WorkEndSound">Після завершення фокусу</sys:String>
+    <sys:String x:Key="BreakEndSound">Після завершення перерви</sys:String>
+    <sys:String x:Key="Tip_Preview">Прослухати</sys:String>
+    <sys:String x:Key="Tip_Browse">Вибрати власний файл</sys:String>
+    <sys:String x:Key="Volume">Гучність</sys:String>
+    <sys:String x:Key="Sound_Hint">Підтримуються файли WAV і MP3.</sys:String>
+    <sys:String x:Key="Theme">Тема</sys:String>
+    <sys:String x:Key="Theme_System">Як у системі</sys:String>
+    <sys:String x:Key="Theme_Dark">Темна</sys:String>
+    <sys:String x:Key="Theme_Light">Світла</sys:String>
+    <sys:String x:Key="Accent">Колір фокусу</sys:String>
+    <sys:String x:Key="Accent_Break">Колір відпочинку</sys:String>
+    <sys:String x:Key="Accent_Auto">Авто: парний до кольору фокусу</sys:String>
+    <sys:String x:Key="Language">Мова</sys:String>
+    <sys:String x:Key="Look_Hint">Тема, колір і мова застосовуються одразу. «Скасувати» поверне попередній вигляд.</sys:String>
+    <sys:String x:Key="Notifications">Сповіщення Windows</sys:String>
+    <sys:String x:Key="AlwaysOnTop">Вікно поверх усіх вікон</sys:String>
+    <sys:String x:Key="MinimizeToTray">Згортати в трей</sys:String>
+    <sys:String x:Key="CloseToTray">Закривати в трей</sys:String>
+    <sys:String x:Key="StartWithWindows">Запускати разом із Windows</sys:String>
+    <sys:String x:Key="System_Hint">Якщо закриття в трей вимкнено, хрестик повністю закриває програму. Вийти завжди можна через меню іконки в треї.</sys:String>
+    <sys:String x:Key="Cancel">Скасувати</sys:String>
+    <sys:String x:Key="Save">Зберегти</sys:String>
+    <sys:String x:Key="Dialog_PickSound">Виберіть звуковий файл</sys:String>
+    <sys:String x:Key="Filter_Audio">Аудіо</sys:String>
+    <sys:String x:Key="Filter_All">Усі файли</sys:String>
+    <sys:String x:Key="Error_Title">Pomodoro — помилка</sys:String>
+
+    <!-- Sounds -->
+    <sys:String x:Key="Sound_Custom">Власний: {0}</sys:String>
+    <sys:String x:Key="Sound_bell">Дзвіночок</sys:String>
+    <sys:String x:Key="Sound_chime">Передзвін</sys:String>
+    <sys:String x:Key="Sound_ding">Дінь</sys:String>
+    <sys:String x:Key="Sound_soft">М'який акорд</sys:String>
+    <sys:String x:Key="Sound_marimba">Маримба</sys:String>
+    <sys:String x:Key="Sound_beep">Біп</sys:String>
+    <sys:String x:Key="Sound_digital">Цифровий</sys:String>
+    <sys:String x:Key="Sound_alarm">Будильник</sys:String>
+
+    <!-- Plural forms: One (1, 21…), Few (2–4, 22–24…), Many (the rest) -->
+    <sys:String x:Key="Sessions_One">сесія</sys:String>
+    <sys:String x:Key="Sessions_Few">сесії</sys:String>
+    <sys:String x:Key="Sessions_Many">сесій</sys:String>
+
+</ResourceDictionary>

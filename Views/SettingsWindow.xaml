@@ -1,0 +1,214 @@
+<Window x:Class="PomodoroTimer.Views.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:conv="clr-namespace:PomodoroTimer.Converters"
+        Title="{DynamicResource Settings_Title}"
+        Width="600" Height="680"
+        WindowStyle="None" ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False"
+        Background="{DynamicResource WindowBg}"
+        Foreground="{DynamicResource TextBrush}"
+        FontFamily="{StaticResource UiFont}"
+        UseLayoutRounding="True" SnapsToDevicePixels="True"
+        TextOptions.TextFormattingMode="Ideal" TextOptions.TextRenderingMode="ClearType">
+
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="44" GlassFrameThickness="0" CornerRadius="0"
+                      ResizeBorderThickness="0" UseAeroCaptionButtons="False" />
+    </WindowChrome.WindowChrome>
+
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+        <conv:PercentConverter x:Key="Percent" />
+        <conv:MinutesConverter x:Key="Minutes" />
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="44" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Title bar -->
+        <Grid Grid.Row="0" Margin="18,0,8,0">
+            <TextBlock Text="{DynamicResource Settings_Title}" FontSize="13" FontWeight="SemiBold"
+                       Foreground="{DynamicResource TextMutedBrush}" VerticalAlignment="Center" />
+            <Button Style="{StaticResource CloseButton}" Content="&#xE8BB;" HorizontalAlignment="Right"
+                    VerticalAlignment="Center" Click="Cancel_Click" />
+        </Grid>
+
+        <!-- Body -->
+        <Grid Grid.Row="1" Margin="12,0,12,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="150" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="0" Margin="0,4,10,0">
+                <RadioButton x:Name="NavTimer" Style="{StaticResource NavItem}" Content="{DynamicResource Nav_Timer}" GroupName="Nav" IsChecked="True" />
+                <RadioButton x:Name="NavSound" Style="{StaticResource NavItem}" Content="{DynamicResource Nav_Sound}" GroupName="Nav" />
+                <RadioButton x:Name="NavLook" Style="{StaticResource NavItem}" Content="{DynamicResource Nav_Look}" GroupName="Nav" />
+                <RadioButton x:Name="NavSystem" Style="{StaticResource NavItem}" Content="{DynamicResource Nav_System}" GroupName="Nav" />
+            </StackPanel>
+
+            <Border Grid.Column="1" Background="{DynamicResource SurfaceBrush}" CornerRadius="14" Padding="24,20">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" PanningMode="VerticalOnly">
+                    <ScrollViewer.Resources>
+                        <Style TargetType="ScrollBar" BasedOn="{StaticResource SlimScrollBar}" />
+                    </ScrollViewer.Resources>
+                    <Grid Margin="0,0,6,0">
+
+                        <!-- ===== Timer ===== -->
+                        <StackPanel Visibility="{Binding IsChecked, ElementName=NavTimer, Converter={StaticResource BoolToVis}}">
+                            <TextBlock Style="{StaticResource SectionTitle}" Text="{DynamicResource Nav_Timer}" />
+
+                            <Grid Margin="0,0,0,4">
+                                <TextBlock Style="{StaticResource SettingLabel}" Text="{DynamicResource Label_Work}" />
+                                <TextBlock Style="{StaticResource SettingValue}" Text="{Binding WorkMinutes, Converter={StaticResource Minutes}}" />
+                            </Grid>
+                            <Slider Style="{StaticResource ModernSlider}" Minimum="1" Maximum="90" Value="{Binding WorkMinutes}" Margin="0,0,0,10" />
+
+                            <Grid Margin="0,0,0,4">
+                                <TextBlock Style="{StaticResource SettingLabel}" Text="{DynamicResource Label_Short}" />
+                                <TextBlock Style="{StaticResource SettingValue}" Text="{Binding ShortBreakMinutes, Converter={StaticResource Minutes}}" />
+                            </Grid>
+                            <Slider Style="{StaticResource ModernSlider}" Minimum="1" Maximum="30" Value="{Binding ShortBreakMinutes}" Margin="0,0,0,10" />
+
+                            <Grid Margin="0,0,0,4">
+                                <TextBlock Style="{StaticResource SettingLabel}" Text="{DynamicResource Label_Long}" />
+                                <TextBlock Style="{StaticResource SettingValue}" Text="{Binding LongBreakMinutes, Converter={StaticResource Minutes}}" />
+                            </Grid>
+                            <Slider Style="{StaticResource ModernSlider}" Minimum="5" Maximum="60" Value="{Binding LongBreakMinutes}" Margin="0,0,0,10" />
+
+                            <Grid Margin="0,0,0,4">
+                                <TextBlock Style="{StaticResource SettingLabel}" Text="{DynamicResource Label_Cycles}" />
+                                <TextBlock Style="{StaticResource SettingValue}" Text="{Binding CyclesBeforeLongBreak}" />
+                            </Grid>
+                            <Slider Style="{StaticResource ModernSlider}" Minimum="2" Maximum="8" Value="{Binding CyclesBeforeLongBreak}" Margin="0,0,0,16" />
+
+                            <CheckBox Style="{StaticResource ToggleSwitch}" Content="{DynamicResource AutoBreaks}" IsChecked="{Binding AutoStartBreaks}" />
+                            <CheckBox Style="{StaticResource ToggleSwitch}" Content="{DynamicResource AutoWork}" IsChecked="{Binding AutoStartWork}" Margin="0,0,0,16" />
+
+                            <CheckBox Style="{StaticResource ToggleSwitch}" Content="{DynamicResource LimitSessions}" IsChecked="{Binding LimitSessions}" />
+                            <StackPanel Visibility="{Binding LimitSessions, Converter={StaticResource BoolToVis}}">
+                                <Grid Margin="0,0,0,4">
+                                    <TextBlock Style="{StaticResource SettingLabel}" Text="{DynamicResource TotalSessions}" />
+                                    <TextBlock Style="{StaticResource SettingValue}" Text="{Binding TotalSessions}" />
+                                </Grid>
+                                <Slider Style="{StaticResource ModernSlider}" Minimum="1" Maximum="16" Value="{Binding TotalSessions}" Margin="0,0,0,12" />
+
+                                <Border Background="{DynamicResource ControlBgBrush}" CornerRadius="10" Padding="14,10">
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding PlanEndText}" FontSize="15" FontWeight="SemiBold"
+                                                   Foreground="{DynamicResource TextBrush}" />
+                                        <TextBlock Style="{StaticResource SettingHint}" Text="{Binding PlanDurationText}" Margin="0,3,0,0" />
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <!-- ===== Sound ===== -->
+                        <StackPanel Visibility="{Binding IsChecked, ElementName=NavSound, Converter={StaticResource BoolToVis}}">
+                            <TextBlock Style="{StaticResource SectionTitle}" Text="{DynamicResource Nav_Sound}" />
+
+                            <CheckBox Style="{StaticResource ToggleSwitch}" Content="{DynamicResource SoundEnabled}" IsChecked="{Binding SoundEnabled}" Margin="0,0,0,18" />
+
+                            <TextBlock Style="{StaticResource SettingLabel}" Text="{DynamicResource WorkEndSound}" Margin="0,0,0,6" />
+                            <Grid Margin="0,0,0,14">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <ComboBox Grid.Column="0" Style="{StaticResource ModernCombo}"
+                                          ItemsSource="{Binding Sounds}" DisplayMemberPath="Name"
+                                          SelectedValuePath="File" SelectedValue="{Binding WorkEndSound}" />
+                                <Button Grid.Column="1" Style="{StaticResource SmallRoundButton}" Content="&#xE768;" ToolTip="{DynamicResource Tip_Preview}"
+                                        Margin="8,0,0,0" Click="PreviewWork_Click" />
+                                <Button Grid.Column="2" Style="{StaticResource SmallRoundButton}" Content="&#xE8E5;" ToolTip="{DynamicResource Tip_Browse}"
+                                        Margin="6,0,0,0" Click="BrowseWork_Click" />
+                            </Grid>
+
+                            <TextBlock Style="{StaticResource SettingLabel}" Text="{DynamicResource BreakEndSound}" Margin="0,0,0,6" />
+                            <Grid Margin="0,0,0,22">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <ComboBox Grid.Column="0" Style="{StaticResource ModernCombo}"
+                                          ItemsSource="{Binding Sounds}" DisplayMemberPath="Name"
+                                          SelectedValuePath="File" SelectedValue="{Binding BreakEndSound}" />
+                                <Button Grid.Column="1" Style="{StaticResource SmallRoundButton}" Content="&#xE768;" ToolTip="{DynamicResource Tip_Preview}"
+                                        Margin="8,0,0,0" Click="PreviewBreak_Click" />
+                                <Button Grid.Column="2" Style="{StaticResource SmallRoundButton}" Content="&#xE8E5;" ToolTip="{DynamicResource Tip_Browse}"
+                                        Margin="6,0,0,0" Click="BrowseBreak_Click" />
+                            </Grid>
+
+                            <Grid Margin="0,0,0,4">
+                                <TextBlock Style="{StaticResource SettingLabel}" Text="{DynamicResource Volume}" />
+                                <TextBlock Style="{StaticResource SettingValue}" Text="{Binding Volume, Converter={StaticResource Percent}}" />
+                            </Grid>
+                            <Slider Style="{StaticResource ModernSlider}" Minimum="0" Maximum="1" TickFrequency="0.05" Value="{Binding Volume}" Margin="0,0,0,10" />
+                            <TextBlock Style="{StaticResource SettingHint}" Text="{DynamicResource Sound_Hint}" />
+                        </StackPanel>
+
+                        <!-- ===== Appearance ===== -->
+                        <StackPanel Visibility="{Binding IsChecked, ElementName=NavLook, Converter={StaticResource BoolToVis}}">
+                            <TextBlock Style="{StaticResource SectionTitle}" Text="{DynamicResource Nav_Look}" />
+
+                            <TextBlock Style="{StaticResource SettingLabel}" Text="{DynamicResource Theme}" Margin="0,0,0,8" />
+                            <Border HorizontalAlignment="Left" Background="{DynamicResource ControlBgBrush}" CornerRadius="12" Padding="4" Margin="0,0,0,22">
+                                <StackPanel Orientation="Horizontal">
+                                    <RadioButton Style="{StaticResource ModeTab}" Content="{DynamicResource Theme_System}" GroupName="Theme" IsChecked="{Binding IsThemeSystem}" />
+                                    <RadioButton Style="{StaticResource ModeTab}" Content="{DynamicResource Theme_Dark}" GroupName="Theme" IsChecked="{Binding IsThemeDark}" />
+                                    <RadioButton Style="{StaticResource ModeTab}" Content="{DynamicResource Theme_Light}" GroupName="Theme" IsChecked="{Binding IsThemeLight}" />
+                                </StackPanel>
+                            </Border>
+
+                            <TextBlock Style="{StaticResource SettingLabel}" Text="{DynamicResource Accent}" Margin="0,0,0,8" />
+                            <ListBox Style="{StaticResource AccentPicker}" ItemsSource="{Binding Accents}"
+                                     SelectedValuePath="Key" SelectedValue="{Binding Accent}" Margin="0,0,0,16" />
+
+                            <TextBlock Style="{StaticResource SettingLabel}" Text="{DynamicResource Accent_Break}" Margin="0,0,0,8" />
+                            <ListBox Style="{StaticResource AccentPicker}" ItemsSource="{Binding BreakAccents}"
+                                     SelectedValuePath="Key" SelectedValue="{Binding BreakAccent}" Margin="0,0,0,22" />
+
+                            <TextBlock Style="{StaticResource SettingLabel}" Text="{DynamicResource Language}" Margin="0,0,0,8" />
+                            <Border HorizontalAlignment="Left" Background="{DynamicResource ControlBgBrush}" CornerRadius="12" Padding="4" Margin="0,0,0,16">
+                                <StackPanel Orientation="Horizontal">
+                                    <RadioButton x:Name="LangEn" Style="{StaticResource ModeTab}" Content="English" GroupName="Lang" IsChecked="{Binding IsLangEn}" />
+                                    <RadioButton x:Name="LangUk" Style="{StaticResource ModeTab}" Content="Українська" GroupName="Lang" IsChecked="{Binding IsLangUk}" />
+                                    <RadioButton x:Name="LangRu" Style="{StaticResource ModeTab}" Content="Русский" GroupName="Lang" IsChecked="{Binding IsLangRu}" />
+                                </StackPanel>
+                            </Border>
+
+                            <TextBlock Style="{StaticResource SettingHint}" Text="{DynamicResource Look_Hint}" />
+                        </StackPanel>
+
+                        <!-- ===== System ===== -->
+                        <StackPanel Visibility="{Binding IsChecked, ElementName=NavSystem, Converter={StaticResource BoolToVis}}">
+                            <TextBlock Style="{StaticResource SectionTitle}" Text="{DynamicResource Nav_System}" />
+
+                            <CheckBox Style="{StaticResource ToggleSwitch}" Content="{DynamicResource Notifications}" IsChecked="{Binding NotificationsEnabled}" />
+                            <CheckBox Style="{StaticResource ToggleSwitch}" Content="{DynamicResource AlwaysOnTop}" IsChecked="{Binding AlwaysOnTop}" />
+                            <CheckBox Style="{StaticResource ToggleSwitch}" Content="{DynamicResource MinimizeToTray}" IsChecked="{Binding MinimizeToTray}" />
+                            <CheckBox Style="{StaticResource ToggleSwitch}" Content="{DynamicResource CloseToTray}" IsChecked="{Binding CloseToTray}" />
+                            <CheckBox Style="{StaticResource ToggleSwitch}" Content="{DynamicResource StartWithWindows}" IsChecked="{Binding StartWithWindows}" />
+                            <TextBlock Style="{StaticResource SettingHint}" Margin="0,6,0,0" Text="{DynamicResource System_Hint}" />
+                        </StackPanel>
+
+                    </Grid>
+                </ScrollViewer>
+            </Border>
+        </Grid>
+
+        <!-- Footer -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,14,12,14">
+            <Button x:Name="CancelButton" Style="{StaticResource SecondaryButton}" Content="{DynamicResource Cancel}" Click="Cancel_Click" Margin="0,0,10,0" />
+            <Button x:Name="SaveButton" Style="{StaticResource PrimaryButton}" Content="{DynamicResource Save}" Height="40" MinWidth="130" Click="Save_Click" />
+        </StackPanel>
+    </Grid>
+</Window>

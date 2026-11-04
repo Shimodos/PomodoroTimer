@@ -1,0 +1,25 @@
+<Application x:Class="PomodoroTimer.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             ShutdownMode="OnExplicitShutdown">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Localization/Strings.en.xaml" />
+                <ResourceDictionary Source="Themes/Dark.xaml" />
+                <ResourceDictionary Source="Themes/Styles.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <!-- Accent brushes are replaced at runtime by ThemeManager -->
+            <Color x:Key="FocusAccentColor">#FF6B6B</Color>
+            <SolidColorBrush x:Key="FocusAccentBrush" Color="#FF6B6B" />
+            <Color x:Key="BreakAccentColor">#38BDF8</Color>
+            <SolidColorBrush x:Key="BreakAccentBrush" Color="#38BDF8" />
+            <Color x:Key="AccentColor">#FF6B6B</Color>
+            <SolidColorBrush x:Key="AccentBrush" Color="#FF6B6B" />
+            <SolidColorBrush x:Key="AccentHoverBrush" Color="#FF8080" />
+            <SolidColorBrush x:Key="AccentPressedBrush" Color="#E05A5A" />
+            <SolidColorBrush x:Key="AccentSoftBrush" Color="#2EFF6B6B" />
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

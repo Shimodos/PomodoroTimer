@@ -1,0 +1,195 @@
+<Window x:Class="PomodoroTimer.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:c="clr-namespace:PomodoroTimer.Controls"
+        xmlns:conv="clr-namespace:PomodoroTimer.Converters"
+        Title="Pomodoro"
+        Width="340" Height="540"
+        WindowStyle="None" ResizeMode="CanMinimize"
+        WindowStartupLocation="CenterScreen"
+        Background="{DynamicResource WindowBg}"
+        Foreground="{DynamicResource TextBrush}"
+        FontFamily="{StaticResource UiFont}"
+        Topmost="{Binding IsTopmost}"
+        UseLayoutRounding="True" SnapsToDevicePixels="True"
+        TextOptions.TextFormattingMode="Ideal" TextOptions.TextRenderingMode="ClearType">
+
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="44" GlassFrameThickness="0" CornerRadius="0"
+                      ResizeBorderThickness="0" UseAeroCaptionButtons="False" />
+    </WindowChrome.WindowChrome>
+
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+        <conv:InverseBoolToVisibilityConverter x:Key="InverseBoolToVis" />
+        <Style x:Key="PinButton" TargetType="Button" BasedOn="{StaticResource TitleButton}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsTopmost}" Value="True">
+                    <Setter Property="Foreground" Value="{DynamicResource AccentBrush}" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="CompactButton" TargetType="Button" BasedOn="{StaticResource TitleButton}">
+            <Setter Property="Content" Value="&#xE73F;" />
+            <Setter Property="ToolTip" Value="{DynamicResource Tip_Compact}" />
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsCompact}" Value="True">
+                    <Setter Property="Content" Value="&#xE740;" />
+                    <Setter Property="ToolTip" Value="{DynamicResource Tip_Normal}" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="44" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Title bar -->
+        <Grid Grid.Row="0" Margin="14,0,8,0">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <!-- Always the color of the running phase, even in compact mode -->
+                <Ellipse Width="10" Height="10" Fill="{Binding ActiveAccentBrush}" Margin="0,0,8,0" />
+                <TextBlock x:Name="TitleText" Text="Pomodoro" FontSize="13" FontWeight="SemiBold"
+                           Foreground="{DynamicResource TextMutedBrush}" VerticalAlignment="Center" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                <Button Style="{StaticResource PinButton}" Content="&#xE718;" ToolTip="{DynamicResource Tip_Pin}"
+                        Command="{Binding ToggleTopmostCommand}" />
+                <Button Style="{StaticResource CompactButton}" Command="{Binding ToggleCompactCommand}" />
+                <Button x:Name="SettingsButton" Style="{StaticResource TitleButton}" Content="&#xE713;" ToolTip="{DynamicResource Tip_Settings}"
+                        Command="{Binding OpenSettingsCommand}" />
+                <Button Style="{StaticResource TitleButton}" Content="&#xE921;" ToolTip="{DynamicResource Tip_Minimize}"
+                        Click="Minimize_Click" />
+                <Button Style="{StaticResource CloseButton}" Content="&#xE8BB;" ToolTip="{DynamicResource Tip_Close}"
+                        Click="Close_Click" />
+            </StackPanel>
+        </Grid>
+
+        <!-- Mode tabs -->
+        <Border x:Name="Tabs" Grid.Row="1" HorizontalAlignment="Center" Margin="0,6,0,0"
+                Background="{DynamicResource ControlBgBrush}" CornerRadius="12" Padding="4">
+            <StackPanel Orientation="Horizontal">
+                <!-- Tabs only choose what is shown; Tag marks the tab whose countdown is live. -->
+                <!-- BorderBrush is the color of the dot that marks the live tab. -->
+                <RadioButton x:Name="TabWork" Style="{StaticResource ModeTab}" Content="{DynamicResource Tab_Work}" GroupName="Phase"
+                             IsChecked="{Binding IsWorkViewed, Mode=TwoWay}" Tag="{Binding IsWorkActive}"
+                             BorderBrush="{DynamicResource FocusAccentBrush}" />
+                <RadioButton x:Name="TabShortBreak" Style="{StaticResource ModeTab}" Content="{DynamicResource Tab_Short}" GroupName="Phase"
+                             IsChecked="{Binding IsShortBreakViewed, Mode=TwoWay}" Tag="{Binding IsShortBreakActive}"
+                             BorderBrush="{DynamicResource BreakAccentBrush}" />
+                <RadioButton x:Name="TabLongBreak" Style="{StaticResource ModeTab}" Content="{DynamicResource Tab_Long}" GroupName="Phase"
+                             IsChecked="{Binding IsLongBreakViewed, Mode=TwoWay}" Tag="{Binding IsLongBreakActive}"
+                             BorderBrush="{DynamicResource BreakAccentBrush}" />
+            </StackPanel>
+        </Border>
+
+        <!-- Ring + time -->
+        <Grid x:Name="RingGrid" Grid.Row="2" Width="236" Height="236" VerticalAlignment="Center">
+            <c:ProgressRing x:Name="Ring" Value="{Binding Progress}" StrokeThickness="10"
+                            TrackBrush="{DynamicResource TrackBrush}"
+                            ProgressBrush="{DynamicResource AccentBrush}" />
+            <!-- Normal view -->
+            <StackPanel VerticalAlignment="Center" Visibility="{Binding IsEditing, Converter={StaticResource InverseBoolToVis}}">
+                <TextBlock x:Name="TimeText" Text="{Binding TimeText}"
+                           FontFamily="{StaticResource DisplayFont}" FontSize="58" FontWeight="Light"
+                           HorizontalAlignment="Center" Margin="0,0,0,-2" />
+                <TextBlock x:Name="StatusText" Text="{Binding StatusText}" FontSize="13"
+                           Foreground="{DynamicResource TextMutedBrush}" HorizontalAlignment="Center" />
+                <Button x:Name="ActiveInfo" Style="{StaticResource LinkButton}" Content="{Binding ActiveInfo}"
+                        Command="{Binding GoToActiveCommand}" Foreground="{Binding ActiveAccentBrush}"
+                        Visibility="{Binding ActiveInfoVisible, Converter={StaticResource BoolToVis}}" Margin="0,2,0,0" />
+                <Button x:Name="EditButton" Style="{StaticResource LinkButton}" Command="{Binding BeginEditCommand}"
+                        ToolTip="{DynamicResource Edit_Tip}" Margin="0,4,0,0"
+                        Visibility="{Binding CanEdit, Converter={StaticResource BoolToVis}}">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="&#xE70F;" FontFamily="{StaticResource IconFont}" FontSize="11" Margin="0,1,6,0" VerticalAlignment="Center" />
+                        <TextBlock Text="{DynamicResource Edit}" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+
+            <!-- In-place duration editor -->
+            <StackPanel x:Name="EditPanel" VerticalAlignment="Center" Visibility="{Binding IsEditing, Converter={StaticResource BoolToVis}}">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <Button Style="{StaticResource StepButton}" Content="&#xE738;" Command="{Binding EditMinusCommand}" VerticalAlignment="Center" ToolTip="−5" />
+                    <TextBox x:Name="EditBox" Style="{StaticResource EditTimeBox}" Width="92" Margin="8,0"
+                             Text="{Binding EditMinutes, UpdateSourceTrigger=PropertyChanged}"
+                             PreviewTextInput="EditBox_PreviewTextInput" KeyDown="EditBox_KeyDown" />
+                    <Button Style="{StaticResource StepButton}" Content="&#xE710;" Command="{Binding EditPlusCommand}" VerticalAlignment="Center" ToolTip="+5" />
+                </StackPanel>
+                <TextBlock Text="{DynamicResource Min}" FontSize="13" Foreground="{DynamicResource TextMutedBrush}" HorizontalAlignment="Center" Margin="0,2,0,0" />
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
+                    <Button x:Name="EditCommit" Style="{StaticResource SmallRoundButton}" Content="&#xE73E;"
+                            Background="{DynamicResource AccentBrush}" Foreground="{DynamicResource OnAccentBrush}"
+                            Command="{Binding CommitEditCommand}" ToolTip="{DynamicResource Save}" />
+                    <Button x:Name="EditCancel" Style="{StaticResource SmallRoundButton}" Content="&#xE711;" Margin="10,0,0,0"
+                            Command="{Binding CancelEditCommand}" ToolTip="{DynamicResource Cancel}" />
+                </StackPanel>
+            </StackPanel>
+        </Grid>
+
+        <!-- Controls -->
+        <StackPanel x:Name="Controls" Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,10">
+            <Button Style="{StaticResource RoundButton}" Content="&#xE72C;" ToolTip="{DynamicResource Tip_Reset}"
+                    Command="{Binding ResetCommand}" />
+            <Button x:Name="PlayButton" Style="{StaticResource PrimaryButton}" Command="{Binding ToggleCommand}" Margin="14,0">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="{Binding PlayGlyph}" FontFamily="{StaticResource IconFont}" FontSize="14"
+                               VerticalAlignment="Center" Margin="0,1,10,0" />
+                    <TextBlock Text="{Binding PlayText}" VerticalAlignment="Center" />
+                </StackPanel>
+            </Button>
+            <Button x:Name="SkipButton" Style="{StaticResource RoundButton}" Content="&#xE893;" ToolTip="{DynamicResource Tip_Skip}"
+                    Command="{Binding SkipCommand}" />
+        </StackPanel>
+
+        <!-- Footer: cycle dots -->
+        <StackPanel x:Name="Footer" Grid.Row="4" HorizontalAlignment="Center" Margin="0,4,0,22">
+            <ItemsControl ItemsSource="{Binding CycleDots}" HorizontalAlignment="Center">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Ellipse Width="8" Height="8" Margin="4,0" StrokeThickness="1.5">
+                            <Ellipse.Style>
+                                <Style TargetType="Ellipse">
+                                    <Setter Property="Fill" Value="{DynamicResource TrackBrush}" />
+                                    <Setter Property="Stroke" Value="Transparent" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Filled}" Value="True">
+                                            <Setter Property="Fill" Value="{DynamicResource AccentBrush}" />
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Current}" Value="True">
+                                            <Setter Property="Stroke" Value="{DynamicResource AccentBrush}" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Ellipse.Style>
+                        </Ellipse>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <!-- Session limit stepper: ‹ 4 sessions › / ∞ -->
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,12,0,0"
+                        ToolTip="{DynamicResource Loops_Tip}">
+                <Button x:Name="LoopsDown" Style="{StaticResource StepButton}" Content="&#xE76B;"
+                        Command="{Binding DecreaseLoopsCommand}" />
+                <TextBlock x:Name="LoopsText" Text="{Binding LoopsText}" FontSize="13" FontWeight="SemiBold"
+                           MinWidth="130" TextAlignment="Center" VerticalAlignment="Center" Margin="4,0" />
+                <Button x:Name="LoopsUp" Style="{StaticResource StepButton}" Content="&#xE76C;"
+                        Command="{Binding IncreaseLoopsCommand}" />
+            </StackPanel>
+            <TextBlock x:Name="SessionLabel" Text="{Binding SessionLabel}" FontSize="12" Foreground="{DynamicResource TextMutedBrush}"
+                       HorizontalAlignment="Center" Margin="0,6,0,0" />
+        </StackPanel>
+    </Grid>
+</Window>

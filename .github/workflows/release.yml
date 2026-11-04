@@ -1,0 +1,66 @@
+name: Release
+
+# Pushing a tag like v1.0.0 builds two zips and publishes them as a GitHub release:
+#   Pomodoro-<ver>-win-x64.zip            self-contained, no .NET install needed
+#   Pomodoro-<ver>-win-x64-framework.zip  small, needs .NET 8 Desktop Runtime
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Version from tag
+        id: ver
+        shell: pwsh
+        run: '"version=$($env:GITHUB_REF_NAME.TrimStart(''v''))" >> $env:GITHUB_OUTPUT'
+
+      - name: Publish self-contained
+        shell: pwsh
+        run: >
+          dotnet publish PomodoroTimer.csproj -c Release -r win-x64 --self-contained true
+          -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true
+          -p:Version=${{ steps.ver.outputs.version }} -o out/standalone
+
+      - name: Publish framework-dependent
+        shell: pwsh
+        run: >
+          dotnet publish PomodoroTimer.csproj -c Release -r win-x64 --self-contained false
+          -p:PublishSingleFile=true -p:Version=${{ steps.ver.outputs.version }} -o out/framework
+
+      - name: Zip
+        shell: pwsh
+        run: |
+          $v = "${{ steps.ver.outputs.version }}"
+          Remove-Item out/standalone/*.pdb, out/framework/*.pdb -ErrorAction SilentlyContinue
+          Compress-Archive -Path out/standalone/* -DestinationPath "Pomodoro-$v-win-x64.zip"
+          Compress-Archive -Path out/framework/* -DestinationPath "Pomodoro-$v-win-x64-framework.zip"
+
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: pwsh
+        run: |
+          $v = "${{ steps.ver.outputs.version }}"
+          $notes = @"
+          ## Downloads
+
+          | File | What it is |
+          |---|---|
+          | ``Pomodoro-$v-win-x64.zip`` | **Recommended.** Self-contained: unzip anywhere and run ``Pomodoro.exe``. No .NET install needed. |
+          | ``Pomodoro-$v-win-x64-framework.zip`` | Small build. Needs the [.NET 8 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/8.0). |
+
+          Windows 10/11, x64. Settings are stored in ``%AppData%\PomodoroTimer``.
+          "@
+          gh release create "$env:GITHUB_REF_NAME" "Pomodoro-$v-win-x64.zip" "Pomodoro-$v-win-x64-framework.zip" --title "Pomodoro $v" --notes "$notes"
