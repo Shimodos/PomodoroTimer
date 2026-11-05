@@ -3,7 +3,7 @@
 Нативный таймер Pomodoro для Windows на C# / WPF (.NET 8). Без Electron, без браузера внутри:
 один exe размером в пару мегабайт и около 40 МБ памяти.
 
-[English version](README.md)
+**Сайт:** https://shimodos.github.io/pomodoro-site/ · [English version](README.md)
 
 <p align="center">
   <img src="docs/screenshots/main-light.png" width="300" alt="Фокус, светлая тема">

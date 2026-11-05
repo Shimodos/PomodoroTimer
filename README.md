@@ -3,7 +3,7 @@
 A small, native Pomodoro timer for Windows. C# / WPF on .NET 8, no Electron, no browser inside:
 a single executable of a couple of megabytes that uses about 40 MB of memory.
 
-[Русская версия](README.ru.md)
+**Website:** https://shimodos.github.io/pomodoro-site/ · [Русская версия](README.ru.md)
 
 <p align="center">
   <img src="docs/screenshots/main-light.png" width="300" alt="Focus session, light theme">
