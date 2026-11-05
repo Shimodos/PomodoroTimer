@@ -66,7 +66,7 @@
                         Command="{Binding OpenSettingsCommand}" />
                 <Button Style="{StaticResource TitleButton}" Content="&#xE921;" ToolTip="{DynamicResource Tip_Minimize}"
                         Click="Minimize_Click" />
-                <Button Style="{StaticResource CloseButton}" Content="&#xE8BB;" ToolTip="{DynamicResource Tip_Close}"
+                <Button x:Name="CloseButton" Style="{StaticResource CloseButton}" Content="&#xE8BB;" ToolTip="{DynamicResource Tip_Close}"
                         Click="Close_Click" />
             </StackPanel>
         </Grid>

@@ -35,6 +35,8 @@ public sealed class AppSettings
 
     // System
     public bool NotificationsEnabled { get; set; } = true;
+    // Bring the window on top of everything (even from the tray) when a phase ends.
+    public bool ShowOnPhaseEnd { get; set; } = true;
     public bool AlwaysOnTop { get; set; } = false;
     public bool MinimizeToTray { get; set; } = true;
     public bool CloseToTray { get; set; } = true;

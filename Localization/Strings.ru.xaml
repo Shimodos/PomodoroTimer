@@ -87,6 +87,7 @@
     <sys:String x:Key="Language">Язык</sys:String>
     <sys:String x:Key="Look_Hint">Тема, цвет и язык применяются сразу. «Отмена» вернёт прежний вид.</sys:String>
     <sys:String x:Key="Notifications">Уведомления Windows</sys:String>
+    <sys:String x:Key="ShowOnPhaseEnd">Показывать окно поверх всех по окончании этапа</sys:String>
     <sys:String x:Key="AlwaysOnTop">Окно поверх всех окон</sys:String>
     <sys:String x:Key="MinimizeToTray">Сворачивать в трей</sys:String>
     <sys:String x:Key="CloseToTray">Закрывать в трей</sys:String>

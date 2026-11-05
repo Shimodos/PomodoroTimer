@@ -31,6 +31,7 @@ Windows 10 / 11, x64. No installer: the app keeps its settings in `%AppData%\Pom
 - **Two accent colors.** One for focus, one for breaks, so you can tell which timer is running at a glance. The break color defaults to a matching companion of the focus color and can be picked separately.
 - **Sounds.** Eight built-in alerts (synthesized, license-free), any WAV or MP3 of your own, volume control, preview.
 - **Notifications and tray.** Windows notification when a phase ends, tray icon showing the minutes left, minimize and close to tray.
+- **Pop up when a phase ends.** The window comes back on top of everything (even from the tray) so you never miss the end of a focus or a break. Can be switched off.
 - **Compact mode** and **always on top** for keeping the timer in a corner.
 - **Dark, light or system theme.**
 - **Three languages:** English, Ukrainian, Russian. Picked up from Windows on first run, switchable live in settings.

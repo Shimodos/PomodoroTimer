@@ -10,7 +10,7 @@
     <AssemblyName>Pomodoro</AssemblyName>
     <RootNamespace>PomodoroTimer</RootNamespace>
     <ApplicationIcon>Assets\app.ico</ApplicationIcon>
-    <Version>1.0.0</Version>
+    <Version>1.0.1</Version>
     <Product>Pomodoro</Product>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
     <LangVersion>latest</LangVersion>

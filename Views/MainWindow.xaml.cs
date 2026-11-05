@@ -23,6 +23,7 @@ public partial class MainWindow : Window
         DataContext = vm;
 
         vm.ShowRequested += ShowFromTray;
+        vm.PopUpRequested += PopUp;
         vm.SettingsRequested += OpenSettings;
         vm.ExitRequested += ExitApplication;
         vm.PropertyChanged += OnViewModelPropertyChanged;
@@ -152,6 +153,13 @@ public partial class MainWindow : Window
         Show();
         WindowState = WindowState.Normal;
         Activate();
+    }
+
+    /// <summary>Phase ended: restore the window (even from the tray) and lift it above every other window.</summary>
+    private void PopUp()
+    {
+        ShowFromTray();
+        WindowHelper.BringToFront(this, keepTopmost: _vm.IsTopmost);
     }
 
     private void OpenSettings()

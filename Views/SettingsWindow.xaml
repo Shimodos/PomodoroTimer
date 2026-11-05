@@ -193,6 +193,7 @@
                             <TextBlock Style="{StaticResource SectionTitle}" Text="{DynamicResource Nav_System}" />
 
                             <CheckBox Style="{StaticResource ToggleSwitch}" Content="{DynamicResource Notifications}" IsChecked="{Binding NotificationsEnabled}" />
+                            <CheckBox x:Name="ShowOnPhaseEndToggle" Style="{StaticResource ToggleSwitch}" Content="{DynamicResource ShowOnPhaseEnd}" IsChecked="{Binding ShowOnPhaseEnd}" />
                             <CheckBox Style="{StaticResource ToggleSwitch}" Content="{DynamicResource AlwaysOnTop}" IsChecked="{Binding AlwaysOnTop}" />
                             <CheckBox Style="{StaticResource ToggleSwitch}" Content="{DynamicResource MinimizeToTray}" IsChecked="{Binding MinimizeToTray}" />
                             <CheckBox Style="{StaticResource ToggleSwitch}" Content="{DynamicResource CloseToTray}" IsChecked="{Binding CloseToTray}" />

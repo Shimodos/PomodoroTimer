@@ -93,6 +93,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     }
 
     public event Action? ShowRequested;
+    /// <summary>A phase just ended and the user wants the window on top of everything.</summary>
+    public event Action? PopUpRequested;
     public event Action? SettingsRequested;
     public event Action? ExitRequested;
 
@@ -327,6 +329,12 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         if (S.SoundEnabled)
         {
             _sound.Play(wasWork ? S.WorkEndSound : S.BreakEndSound, S.Volume);
+        }
+
+        if (S.ShowOnPhaseEnd)
+        {
+            ActivityLog.Write("UI: pop up window on phase end");
+            PopUpRequested?.Invoke();
         }
 
         if (_engine.IsFinished)

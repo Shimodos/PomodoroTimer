@@ -87,6 +87,7 @@
     <sys:String x:Key="Language">Language</sys:String>
     <sys:String x:Key="Look_Hint">Theme, color and language apply immediately. Cancel restores the previous look.</sys:String>
     <sys:String x:Key="Notifications">Windows notifications</sys:String>
+    <sys:String x:Key="ShowOnPhaseEnd">Pop up on top when a phase ends</sys:String>
     <sys:String x:Key="AlwaysOnTop">Keep window on top</sys:String>
     <sys:String x:Key="MinimizeToTray">Minimize to tray</sys:String>
     <sys:String x:Key="CloseToTray">Close to tray</sys:String>

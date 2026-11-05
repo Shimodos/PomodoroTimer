@@ -160,6 +160,7 @@ public sealed class SettingsViewModel : ObservableObject
 
     // System
     public bool NotificationsEnabled { get => _s.NotificationsEnabled; set { _s.NotificationsEnabled = value; OnPropertyChanged(); } }
+    public bool ShowOnPhaseEnd { get => _s.ShowOnPhaseEnd; set { _s.ShowOnPhaseEnd = value; OnPropertyChanged(); } }
     public bool AlwaysOnTop { get => _s.AlwaysOnTop; set { _s.AlwaysOnTop = value; OnPropertyChanged(); } }
     public bool MinimizeToTray { get => _s.MinimizeToTray; set { _s.MinimizeToTray = value; OnPropertyChanged(); } }
     public bool CloseToTray { get => _s.CloseToTray; set { _s.CloseToTray = value; OnPropertyChanged(); } }
