@@ -254,7 +254,7 @@ Status after phase 5 (2026-11-09, macOS 27, Command Line Tools only):
 
 ## 8. Release (later)
 
-A second workflow, `.github/workflows/release-macos.yml`, on the same `v*` tags, runner `macos-14`:
+A second workflow, `.github/workflows/release-macos.yml`, on the same `v*` tags, runner `macos-latest`:
 `make app VERSION=<tag>` → `make zip` (and `make dmg`) → `gh release upload <tag> build/Pomodoro-<ver>-macos.zip build/Pomodoro-<ver>-macos.dmg`
 (the Windows workflow creates the release; make the Mac job wait for it or use `--clobber`).
 

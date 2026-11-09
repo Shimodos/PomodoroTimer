@@ -4,24 +4,34 @@ name: Release (macOS)
 #   Pomodoro-<ver>-macos.zip   the .app, ad-hoc signed (right-click → Open on first launch)
 #   Pomodoro-<ver>-macos.dmg   drag-to-Applications installer
 # to the GitHub release. The Windows workflow usually creates the release; this job waits
-# for it and creates it itself only if it never shows up.
+# for it and creates it itself only if it never shows up. Can also be run by hand for an
+# existing tag (Actions → Release (macOS) → Run workflow).
 on:
   push:
     tags:
       - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing tag to build and attach to (e.g. v1.0.3)"
+        required: true
 
 permissions:
   contents: write
 
 jobs:
   release-macos:
-    runs-on: macos-14
+    runs-on: macos-latest
+    env:
+      TAG: ${{ inputs.tag || github.ref_name }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag || github.ref }}
 
       - name: Version from tag
         id: ver
-        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+        run: echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
 
       - name: Toolchain
         run: |
@@ -45,18 +55,18 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           for i in $(seq 1 30); do
-            gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1 && exit 0
+            gh release view "$TAG" >/dev/null 2>&1 && exit 0
             sleep 20
           done
           v="${{ steps.ver.outputs.version }}"
-          gh release create "$GITHUB_REF_NAME" --title "Pomodoro $v" --notes "Pomodoro $v" || true
+          gh release create "$TAG" --title "Pomodoro $v" --notes "Pomodoro $v" || true
 
       - name: Upload
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           v="${{ steps.ver.outputs.version }}"
-          gh release upload "$GITHUB_REF_NAME" \
+          gh release upload "$TAG" \
             "macos/build/Pomodoro-$v-macos.zip" \
             "macos/build/Pomodoro-$v-macos.dmg" \
             --clobber
