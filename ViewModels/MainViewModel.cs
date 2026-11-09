@@ -493,7 +493,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     public void Dispose()
     {
-        _sound.Stop();
+        _sound.Dispose();
         _tray.Dispose();
     }
 }

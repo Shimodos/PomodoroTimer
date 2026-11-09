@@ -4,6 +4,8 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Windows.Media;
+using System.Windows.Threading;
+using Microsoft.Win32;
 
 namespace PomodoroTimer.Services;
 
@@ -29,7 +31,13 @@ public sealed class SoundOption : INotifyPropertyChanged
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Name)));
 }
 
-public sealed class SoundService
+/// <summary>
+/// Plays the alert sounds. A MediaPlayer that lived through a system sleep goes silent for good:
+/// the file opens, Position advances, MediaFailed never fires, but nothing reaches the speakers.
+/// So no player is kept between alerts — every Play gets a fresh one — and the current player is
+/// released when Windows is about to suspend.
+/// </summary>
+public sealed class SoundService : IDisposable
 {
     // Order here is the order shown in the settings list.
     private static readonly string[] Order =
@@ -37,7 +45,13 @@ public sealed class SoundService
         "bell.wav", "chime.wav", "ding.wav", "soft.wav", "marimba.wav", "beep.wav", "digital.wav", "alarm.wav",
     };
 
-    private readonly MediaPlayer _player = new();
+    private readonly Dispatcher _dispatcher = Dispatcher.CurrentDispatcher;
+    private MediaPlayer? _player;
+
+    public SoundService()
+    {
+        SystemEvents.PowerModeChanged += OnPowerModeChanged;
+    }
 
     public static string SoundsDir => Path.Combine(AppContext.BaseDirectory, "Sounds");
 
@@ -77,16 +91,53 @@ public sealed class SoundService
 
         try
         {
-            _player.Stop();
-            _player.Open(new Uri(path, UriKind.Absolute));
-            _player.Volume = Math.Clamp(volume, 0, 1);
-            _player.Play();
+            ReleasePlayer();
+
+            var player = new MediaPlayer();
+            player.MediaFailed += (_, e) =>
+                ActivityLog.Write($"Sound failed: {Path.GetFileName(path)}: {e.ErrorException.Message}");
+            player.Open(new Uri(path, UriKind.Absolute));
+            player.Volume = Math.Clamp(volume, 0, 1);
+            player.Play();
+            _player = player;
         }
-        catch
+        catch (Exception e)
         {
             // A broken media file must not take the timer down.
+            ActivityLog.Write($"Sound error: {Path.GetFileName(path)}: {e.Message}");
         }
     }
 
-    public void Stop() => _player.Stop();
+    public void Stop() => ReleasePlayer();
+
+    public void Dispose()
+    {
+        SystemEvents.PowerModeChanged -= OnPowerModeChanged;
+        ReleasePlayer();
+    }
+
+    // SystemEvents raises this on its own thread; MediaPlayer must be touched on the thread that created it.
+    private void OnPowerModeChanged(object? sender, PowerModeChangedEventArgs e)
+    {
+        if (e.Mode != PowerModes.Suspend) return;
+        ActivityLog.Write("Sound: system suspend, player released");
+        _dispatcher.BeginInvoke(ReleasePlayer);
+    }
+
+    private void ReleasePlayer()
+    {
+        var player = _player;
+        _player = null;
+        if (player == null) return;
+
+        try
+        {
+            player.Stop();
+            player.Close();
+        }
+        catch
+        {
+            // Releasing a dead player is best effort.
+        }
+    }
 }
