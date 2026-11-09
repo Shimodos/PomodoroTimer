@@ -30,7 +30,7 @@ PomodoroTimer/
     │   ├── PomodoroCore/         pure Swift, no AppKit: settings model, timer engine, schedule, colors, plurals
     │   └── PomodoroApp/          AppKit + SwiftUI: windows, views, status item, notifications, sounds, login item
     └── Tests/
-        └── PomodoroCoreTests/    XCTest for PomodoroCore
+        └── PomodoroCoreTests/    Swift Testing suites for PomodoroCore
 ```
 
 `build/` and `.build/` are git-ignored.
@@ -38,17 +38,20 @@ PomodoroTimer/
 ## 2. Requirements on the Mac
 
 - macOS 13 Ventura or newer (runtime target; `SMAppService` and the SwiftUI features used need 13).
-- Xcode 15 or newer from the App Store (gives Swift 5.9+, the macOS SDK, `swift build`, `codesign`,
-  `iconutil`, `sips`, `python3`). After installing, run `sudo xcodebuild -license accept` once.
-  The Command Line Tools alone may be enough for `swift build`; check with `swift --version` and a
-  first `make app` before relying on it.
+- Xcode 15 or newer, **or** just the Command Line Tools (`xcode-select --install`). Verified on a
+  Mac with the Command Line Tools only (Swift 6.2, macOS 26 SDK): `swift build`, `make app`,
+  `codesign`, `iconutil`, `sips` and `python3` all work without Xcode. One consequence: XCTest is
+  not part of the Command Line Tools, so the tests use Swift Testing (`import Testing`), which is;
+  `make test` adds the framework path and disables the (incomplete) Foundation cross-import overlay
+  when it detects the Command Line Tools as the active developer directory. With Xcode installed
+  plain `swift test` works.
 - No Apple Developer account is needed to build and run locally (ad-hoc signing). It is needed only
   for notarized downloads (§8).
 
 ## 3. Package
 
 ```swift
-// swift-tools-version: 5.9
+// swift-tools-version: 6.0
 import PackageDescription
 
 let package = Package(
@@ -58,9 +61,13 @@ let package = Package(
         .target(name: "PomodoroCore"),
         .executableTarget(name: "PomodoroApp", dependencies: ["PomodoroCore"]),
         .testTarget(name: "PomodoroCoreTests", dependencies: ["PomodoroCore"]),
-    ]
+    ],
+    swiftLanguageModes: [.v5]
 )
 ```
+
+Tools version 6.0 is needed for SwiftPM to run Swift Testing tests; the code itself stays in Swift 5
+language mode, so the AppKit glue needs no strict-concurrency annotations.
 
 No dependencies. No SwiftPM resources: sounds, strings and the icon are placed into the bundle by
 `bundle.sh`, and the app reads them from `Bundle.main.resourceURL`. That keeps `swift build`
@@ -89,8 +96,11 @@ simple and avoids the `Bundle.module` lookup inside a hand-made `.app`.
 - `MainWindowController` — `NSWindow` subclass (`miniaturize` override for "minimize to menu bar"),
   `NSWindowDelegate` (`windowShouldClose`, `windowDidMove`), `NSHostingView(rootView: MainView(vm))`,
   compact resizing anchored at the top-left, level `.floating` / `.normal`, `popUp()`.
-- `SettingsWindowController` — modal window hosting `SettingsView` over a `SettingsViewModel` that
-  edits a draft copy; live preview of theme/accents/language; `Cancel` reverts.
+- `SettingsWindowController` — window hosting `SettingsView` over a `SettingsViewModel` that edits
+  a draft copy; live preview of theme/accents/language; `Cancel` reverts. Presented as a plain
+  window while the main window has `ignoresMouseEvents = true`, **not** with `NSApp.runModal`:
+  SwiftUI controls did not receive real mouse clicks inside the modal run loop (synthetic events
+  posted from inside the process did work, which hid the bug in scripted tests).
 - `Theme: ObservableObject` — current palette (light/dark), focus/break accents, the "viewed phase"
   switch; sets `NSApp.appearance` (`nil` for System, `.darkAqua`, `.aqua`); observes
   `NSApplication.shared.effectiveAppearance` with KVO to follow the system.
@@ -138,8 +148,14 @@ inside the windows.
    `<lang>.json`).
 8. `codesign --force --deep --sign - build/Pomodoro.app` (ad-hoc).
 
-`make run` = `make app` then `open build/Pomodoro.app`. `make test` = `swift test`.
+`make run` = `make app` then `open build/Pomodoro.app`. `make test` = `swift test` (plus the
+Command Line Tools flags described in §2 when Xcode is absent).
 `make zip` = `ditto -c -k --keepParent build/Pomodoro.app build/Pomodoro-<version>-macos.zip`.
+`make dmg` = `scripts/dmg.sh`: a drag-to-Applications disk image, `build/Pomodoro-<version>-macos.dmg`.
+The script stages the app, an `Applications` symlink and a background drawn by
+`scripts/dmg-background.swift` ("Install Pomodoro · Drag to Applications", arrow between the two
+icon slots), creates a read-write image, scripts Finder to set icon view / 128-pt icons / positions /
+background, then compresses to UDZO. Scripting Finder asks for Automation permission once.
 
 Why a bundle and not `swift run`: `UNUserNotificationCenter` aborts in a process that is not inside
 an `.app` bundle (`bundleProxyForCurrentProcess is nil`), the icon and the Dock name come from the
@@ -169,12 +185,15 @@ the Mac if a build breaks on one of them.
 
 Things to confirm on the Mac before relying on them (not verified here): the exact `.build` product
 path for universal builds; whether `NSApplication.activate(ignoringOtherApps:)` is deprecated on the
-installed SDK (macOS 14 introduced `activate()`); `iconutil` accepting an iconset without the 512-px
-sizes; whether the Command Line Tools alone can build SwiftUI code.
+installed SDK (macOS 14 introduced `activate()`). Confirmed in phase 1: `iconutil` accepts an iconset
+without the 512-px sizes; the Command Line Tools alone build AppKit/SwiftUI code and the `.app`; the
+single-arch release product is at `$(swift build -c release --show-bin-path)/PomodoroApp`.
 
 ## 6. Tests
 
-`swift test` runs `PomodoroCoreTests`. Minimum set, each mirroring a Windows behaviour:
+`make test` runs `PomodoroCoreTests` (Swift Testing; thin `expectEqual` / `expectTrue` helpers in
+`Tests/PomodoroCoreTests/Expect.swift` keep the assertions XCTest-shaped). Minimum set, each
+mirroring a Windows behaviour:
 
 - **Engine**: start/pause keeps `remaining` within 1 tick of `endDate − now`; countdown to zero calls
   `phaseCompleted(work)` once and moves to `shortBreak`; 4 cycles → the 4th work session advances to
@@ -193,6 +212,9 @@ sizes; whether the Command Line Tools alone can build SwiftUI code.
   → `#FF6B6B`; blend values for hover/pressed.
 - **SessionText**: the label examples in SPEC §6.4.
 
+`open build/Pomodoro.app --args --settings` opens the settings window right after launch, handy for
+checking a language or theme in both windows at once.
+
 Manual checklist for the windows (run with a scratch data dir: `POMODORO_DATA_DIR=/tmp/pomo make run`):
 
 1. Launch: 25:00, Focus tab, four dots, `‹ 4 sessions ›`, label `Session 1 of 4 · 1 h 55 min left · until HH:mm`.
@@ -207,6 +229,20 @@ Manual checklist for the windows (run with a scratch data dir: `POMODORO_DATA_DI
 9. Quit, relaunch: position, compact mode and settings restored; `activity.log` has the expected lines.
 10. Copy a Windows `settings.json` into the data dir → same values on screen.
 
+Status after phase 5 (2026-11-09, macOS 27, Command Line Tools only):
+
+| # | Result |
+|---|---|
+| 1, 2, 3, 5 | checked through scripted view-model calls and screenshots; buttons also clicked by the user |
+| 4 | checked live with a 1-minute focus: sound, banner, pop-up from hidden, auto-started break |
+| 6 | pages, live preview, Cancel revert and Save checked; the custom-MP3 open panel only by code review |
+| 7 | checked (hide on close / minimize, Show from the menu bar item, quit when close-to-menu-bar is off only by code review) |
+| 8 | **not checked**: registering a dev build as a login item was deliberately not done on the developer's Mac |
+| 9 | position, compact mode and settings restore checked; `activity.log` lines match Windows |
+| 10 | checked with the decoding test on a Windows-shaped file; not with a real file from a Windows machine |
+| — | Theme = System follows the system appearance live (toggled through System Events); en / uk / ru verified on both windows |
+| — | Space, ⌘-shortcuts and window dragging need a real keyboard / mouse: **not checked by the port author** |
+
 ## 7. Development loop with Claude Code
 
 - Work from the repository root so the Windows sources are readable as reference; edit only under `macos/` and `docs/macos/`.
@@ -219,7 +255,7 @@ Manual checklist for the windows (run with a scratch data dir: `POMODORO_DATA_DI
 ## 8. Release (later)
 
 A second workflow, `.github/workflows/release-macos.yml`, on the same `v*` tags, runner `macos-14`:
-`make app VERSION=<tag>` → `make zip` → `gh release upload <tag> build/Pomodoro-<ver>-macos.zip`
+`make app VERSION=<tag>` → `make zip` (and `make dmg`) → `gh release upload <tag> build/Pomodoro-<ver>-macos.zip build/Pomodoro-<ver>-macos.dmg`
 (the Windows workflow creates the release; make the Mac job wait for it or use `--clobber`).
 
 Without an Apple Developer ID the zip is ad-hoc signed and not notarized: Gatekeeper will refuse the

@@ -10,11 +10,13 @@ Claude Code, не глядя в Windows-код руками. Windows-прило�
 | [ARCHITECTURE.md](ARCHITECTURE.md) | Как устроен порт: Swift-пакет в `macos/`, разделение AppKit / SwiftUI, скрипт сборки `.app`, тесты, проверенные факты о macOS API, релиз |
 | [KICKOFF.md](KICKOFF.md) | Готовый промпт для Claude Code на Mac и порядок фаз |
 
+Скриншоты текущей сборки: [фокус](screenshots/main-light-focus.png), [вкладка Break во время фокуса](screenshots/main-light-break-view.png), [компакт](screenshots/compact-light.png), [редактор длительности](screenshots/main-light-edit.png), настройки: [Таймер](screenshots/settings-timer.png), [Звук](screenshots/settings-sound.png), [Внешний вид, тёмная](screenshots/settings-appearance-dark.png), [Система по-русски](screenshots/settings-system-ru.png).
+
 ## Что нужно на MacBook
 
 1. macOS 13 Ventura или новее.
-2. Xcode 15+ из App Store (нужен ради Swift и SDK; саму IDE открывать не придётся). После установки
-   один раз: `sudo xcodebuild -license accept`.
+2. Xcode 15+ **или** только Command Line Tools (`xcode-select --install`). Проверено: Command Line
+   Tools достаточно для сборки, тестов и `.app`; Xcode ставить не обязательно.
 3. Git и SSH-ключ, добавленный в GitHub (репозиторий клонируется по `git@github.com:Shimodos/PomodoroTimer.git`).
 4. Claude Code, установленный по официальной инструкции с claude.com/claude-code.
 
@@ -48,8 +50,12 @@ make test
 POMODORO_DATA_DIR=/tmp/pomo make run
 ```
 
-`make test` гоняет юнит-тесты логики (движок, расписание, настройки, локализация, цвета).
-`make run` собирает `macos/build/Pomodoro.app` и открывает его. Переменная `POMODORO_DATA_DIR`
+`make test` гоняет юнит-тесты логики на Swift Testing (движок, расписание, настройки, локализация,
+цвета, тексты сессий, логи).
+`make run` собирает `macos/build/Pomodoro.app` и открывает его. `open build/Pomodoro.app --args --settings`
+сразу открывает окно настроек. `make dmg` делает установщик
+`build/Pomodoro-<версия>-macos.dmg` с окном «Install Pomodoro → Applications»
+([скриншот](screenshots/dmg-installer.png)). Переменная `POMODORO_DATA_DIR`
 уводит настройки и логи в отдельную папку, чтобы не трогать настоящие
 (`~/Library/Application Support/PomodoroTimer/`). Ручной чек-лист из десяти пунктов — в
 [ARCHITECTURE.md, §6](ARCHITECTURE.md#6-tests).

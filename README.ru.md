@@ -1,15 +1,21 @@
 # Pomodoro
 
-Нативный таймер Pomodoro для Windows на C# / WPF (.NET 8). Без Electron, без браузера внутри:
-один exe размером в пару мегабайт и около 40 МБ памяти.
+Нативный таймер Pomodoro для Windows и macOS. Без Electron, без браузера внутри.
+Windows: C# / WPF (.NET 8), один exe размером в пару мегабайт и около 40 МБ памяти.
+macOS: Swift, AppKit + SwiftUI, тот же таймер, те же настройки и вид (см. [macOS](#macos)).
 
 **Сайт:** https://shimodos.github.io/pomodoro-site/ · [English version](README.md)
 
 <p align="center">
-  <img src="docs/screenshots/main-light.png" width="300" alt="Фокус, светлая тема">
+  <img src="docs/screenshots/main-light.png" width="280" alt="Windows: фокус, светлая тема">
   &nbsp;&nbsp;
-  <img src="docs/screenshots/main-dark-break-view.png" width="300" alt="Просмотр перерыва во время фокуса, тёмная тема">
+  <img src="docs/macos/screenshots/main-light-focus.png" width="280" alt="macOS: фокус, светлая тема">
+  &nbsp;&nbsp;
+  <img src="docs/screenshots/main-dark-break-view.png" width="280" alt="Windows: просмотр перерыва во время фокуса, тёмная тема">
 </p>
+<p align="center"><sub>Windows · macOS · Windows (тёмная)</sub></p>
+
+**Есть для Windows 10 / 11 и macOS 13+.** Обе версии живут в этом репозитории и выходят одним релизом.
 
 ## Скачать
 
@@ -21,6 +27,15 @@
 | `Pomodoro-<версия>-win-x64-framework.zip` | Маленькая сборка, нужен [.NET 8 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/8.0). |
 
 Windows 10 / 11, x64. Установщика нет: настройки хранятся в `%AppData%\PomodoroTimer`, для удаления достаточно стереть папку.
+
+| Файл | Что это |
+|---|---|
+| `Pomodoro-<версия>-macos.dmg` | **macOS.** Открыть и перетащить Pomodoro в Applications. |
+| `Pomodoro-<версия>-macos.zip` | Тот же `.app` в архиве. |
+
+macOS 13 Ventura и новее, Apple Silicon и Intel. Сборка подписана ad hoc и не нотаризована (нет
+аккаунта Apple Developer), поэтому первый запуск Gatekeeper не пропустит: правый клик по приложению →
+**Открыть** → **Открыть**, либо один раз `xattr -d com.apple.quarantine /Applications/Pomodoro.app`.
 
 ## Возможности
 
@@ -76,6 +91,36 @@ dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=
 
 Релизы собирает [GitHub Actions](.github/workflows/release.yml) при пуше тега `v*`.
 
+## macOS
+
+Нативная версия для Mac лежит в [`macos/`](macos/) и делит с Windows-приложением звуки, иконку и
+таблицы строк. Та же логика таймера, те же два окна, тот же `settings.json`: файл с Windows работает
+на Mac и наоборот. Сознательные отличия: нативная рамка окна со «светофором», иконка в строке меню
+вместо трея, уведомления macOS, «Открывать при входе» как объект входа, SF Symbols и системный шрифт.
+Подробности, скриншоты и полная спецификация: [`docs/macos/`](docs/macos/).
+
+<p align="center">
+  <img src="docs/macos/screenshots/main-light-focus.png" width="300" alt="macOS: фокус, светлая тема">
+  &nbsp;&nbsp;
+  <img src="docs/macos/screenshots/settings-appearance-dark.png" width="420" alt="macOS: внешний вид, тёмная тема">
+</p>
+
+Собирается на Mac с Command Line Tools (`xcode-select --install`) или Xcode, больше ничего не нужно:
+
+```bash
+cd macos && make app
+```
+
+```bash
+cd macos && make test
+```
+
+`make run` собирает и открывает `macos/build/Pomodoro.app`, `make zip` и `make dmg` делают файлы
+релиза. Настройки и логи лежат в `~/Library/Application Support/PomodoroTimer/` (переменная
+`POMODORO_DATA_DIR` переопределяет). Релизы для обеих платформ собирает GitHub Actions
+([Windows](.github/workflows/release.yml), [macOS](.github/workflows/release-macos.yml)) при пуше
+тега `v*`.
+
 ## Структура
 
 | Папка | Что внутри |
@@ -90,6 +135,8 @@ dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=
 | `Sounds/` | встроенные WAV-сигналы |
 | `Assets/` | иконка приложения |
 | `tools/` | `gen-assets.js` — скрипт на Node, который синтезирует звуки и рисует иконку |
+| `macos/` | приложение для macOS: Swift-пакет (`PomodoroCore` логика + `PomodoroApp` интерфейс), тесты, скрипты сборки |
+| `docs/macos/` | спецификация, архитектура и скриншоты порта |
 
 Сторонних пакетов нет: вид в духе Fluent сделан стилями WPF, трей через `NotifyIcon` из WinForms, звук через `MediaPlayer` WPF.
 

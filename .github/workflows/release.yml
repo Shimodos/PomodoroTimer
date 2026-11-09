@@ -1,6 +1,7 @@
 name: Release
 
-# Pushing a tag like v1.0.0 builds two zips and publishes them as a GitHub release:
+# Pushing a tag like v1.0.0 builds two Windows zips and publishes them as a GitHub release
+# (release-macos.yml adds the macOS dmg and zip to the same release):
 #   Pomodoro-<ver>-win-x64.zip            self-contained, no .NET install needed
 #   Pomodoro-<ver>-win-x64-framework.zip  small, needs .NET 8 Desktop Runtime
 on:
@@ -60,7 +61,11 @@ jobs:
           |---|---|
           | ``Pomodoro-$v-win-x64.zip`` | **Recommended.** Self-contained: unzip anywhere and run ``Pomodoro.exe``. No .NET install needed. |
           | ``Pomodoro-$v-win-x64-framework.zip`` | Small build. Needs the [.NET 8 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/8.0). |
+          | ``Pomodoro-$v-macos.dmg`` | **macOS.** Open and drag Pomodoro to Applications. |
+          | ``Pomodoro-$v-macos.zip`` | The same Mac app zipped. |
 
-          Windows 10/11, x64. Settings are stored in ``%AppData%\PomodoroTimer``.
+          Windows 10/11, x64: settings are stored in ``%AppData%\PomodoroTimer``.
+          macOS 13+, universal: settings in ``~/Library/Application Support/PomodoroTimer``. The Mac build is not notarized: on first launch right-click Pomodoro → Open → Open.
+          The macOS files are attached a few minutes after the Windows ones by a second workflow.
           "@
           gh release create "$env:GITHUB_REF_NAME" "Pomodoro-$v-win-x64.zip" "Pomodoro-$v-win-x64-framework.zip" --title "Pomodoro $v" --notes "$notes"

@@ -1,0 +1,9 @@
+{
+  "Notifications": "Notifications",
+  "MinimizeToTray": "Minimize to the menu bar",
+  "CloseToTray": "Close to the menu bar",
+  "StartWithWindows": "Open at login",
+  "System_Hint": "If close-to-menu-bar is off, the close button quits the app. You can always quit from the menu bar icon.",
+  "Tray_Exit": "Quit Pomodoro",
+  "Login_Approval": "Allow Pomodoro in System Settings → General → Login Items."
+}

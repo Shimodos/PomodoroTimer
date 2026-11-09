@@ -1,15 +1,21 @@
 # Pomodoro
 
-A small, native Pomodoro timer for Windows. C# / WPF on .NET 8, no Electron, no browser inside:
-a single executable of a couple of megabytes that uses about 40 MB of memory.
+A small, native Pomodoro timer for Windows and macOS. No Electron, no browser inside.
+Windows: C# / WPF on .NET 8, a single executable of a couple of megabytes that uses about 40 MB of
+memory. macOS: Swift, AppKit + SwiftUI, the same timer, settings file and look (see [macOS](#macos)).
 
 **Website:** https://shimodos.github.io/pomodoro-site/ · [Русская версия](README.ru.md)
 
 <p align="center">
-  <img src="docs/screenshots/main-light.png" width="300" alt="Focus session, light theme">
+  <img src="docs/screenshots/main-light.png" width="280" alt="Windows: focus session, light theme">
   &nbsp;&nbsp;
-  <img src="docs/screenshots/main-dark-break-view.png" width="300" alt="Looking at the break tab while focus runs, dark theme">
+  <img src="docs/macos/screenshots/main-light-focus.png" width="280" alt="macOS: focus session, light theme">
+  &nbsp;&nbsp;
+  <img src="docs/screenshots/main-dark-break-view.png" width="280" alt="Windows: looking at the break tab while focus runs, dark theme">
 </p>
+<p align="center"><sub>Windows · macOS · Windows (dark)</sub></p>
+
+**Available for Windows 10 / 11 and macOS 13+.** Both versions are in this repository and ship from the same release.
 
 ## Download
 
@@ -21,6 +27,15 @@ Grab the latest build from the [Releases](https://github.com/Shimodos/PomodoroTi
 | `Pomodoro-<version>-win-x64-framework.zip` | Small build that needs the [.NET 8 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/8.0). |
 
 Windows 10 / 11, x64. No installer: the app keeps its settings in `%AppData%\PomodoroTimer`, so you can delete the folder to uninstall.
+
+| File | What it is |
+|---|---|
+| `Pomodoro-<version>-macos.dmg` | **macOS.** Open, drag Pomodoro to Applications. |
+| `Pomodoro-<version>-macos.zip` | The same `.app` zipped. |
+
+macOS 13 Ventura or newer, Apple Silicon and Intel. The build is signed ad hoc and not notarized
+(no Apple Developer account), so the first launch is refused by Gatekeeper: right-click the app →
+**Open** → **Open**, or run `xattr -d com.apple.quarantine /Applications/Pomodoro.app` once.
 
 ## Features
 
@@ -76,6 +91,37 @@ dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=
 
 Releases are built by [GitHub Actions](.github/workflows/release.yml) when a `v*` tag is pushed.
 
+## macOS
+
+The native Mac version lives in [`macos/`](macos/) and shares the sounds, the icon and the string
+tables with the Windows app. Same timer logic, same two windows, same `settings.json`: a file from
+Windows works on the Mac and vice versa. What is deliberately different: native window chrome with the
+traffic lights, a menu bar item instead of the tray icon, macOS notifications, "Open at login" as a
+login item, SF Symbols and the system font. Details, screenshots and the full spec:
+[`docs/macos/`](docs/macos/).
+
+<p align="center">
+  <img src="docs/macos/screenshots/main-light-focus.png" width="300" alt="macOS: focus session, light theme">
+  &nbsp;&nbsp;
+  <img src="docs/macos/screenshots/settings-appearance-dark.png" width="420" alt="macOS: appearance settings, dark theme">
+</p>
+
+Build on a Mac with the Command Line Tools (`xcode-select --install`) or Xcode; nothing else:
+
+```bash
+cd macos && make app
+```
+
+```bash
+cd macos && make test
+```
+
+`make run` builds and opens `macos/build/Pomodoro.app`, `make zip` and `make dmg` produce the
+release files. Settings and logs live in `~/Library/Application Support/PomodoroTimer/`
+(`POMODORO_DATA_DIR` overrides). Releases for both platforms are built by GitHub Actions
+([Windows](.github/workflows/release.yml), [macOS](.github/workflows/release-macos.yml)) when a
+`v*` tag is pushed.
+
 ## Project layout
 
 | Folder | Contents |
@@ -90,6 +136,8 @@ Releases are built by [GitHub Actions](.github/workflows/release.yml) when a `v*
 | `Sounds/` | built-in WAV alerts |
 | `Assets/` | application icon |
 | `tools/` | `gen-assets.js`, the Node script that synthesizes the sounds and draws the icon |
+| `macos/` | the macOS app: Swift package (`PomodoroCore` logic + `PomodoroApp` UI), tests, build scripts |
+| `docs/macos/` | spec, architecture and screenshots of the macOS port |
 
 No third-party packages: the Fluent-like look is hand-written WPF styles, the tray uses the WinForms `NotifyIcon`, audio goes through WPF `MediaPlayer`.
 
