@@ -11,6 +11,7 @@ final class StatusItemController {
     private let toggleEntry: NSMenuItem
 
     var showRequested: () -> Void = {}
+    var settingsRequested: () -> Void = {}
     var toggleRequested: () -> Void = {}
     var quitRequested: () -> Void = {}
 
@@ -22,11 +23,14 @@ final class StatusItemController {
 
         let show = NSMenuItem(title: env.L("Tray_Show"), action: #selector(onShow), keyEquivalent: "")
         toggleEntry = NSMenuItem(title: env.L("Start"), action: #selector(onToggle), keyEquivalent: "")
+        let settings = NSMenuItem(title: env.L("Settings_Title") + "…", action: #selector(onSettings), keyEquivalent: "")
         let quit = NSMenuItem(title: env.L("Tray_Exit"), action: #selector(onQuit), keyEquivalent: "")
-        for entry in [show, toggleEntry, quit] { entry.target = self }
+        for entry in [show, toggleEntry, settings, quit] { entry.target = self }
 
         menu.addItem(show)
         menu.addItem(toggleEntry)
+        menu.addItem(.separator())
+        menu.addItem(settings)
         menu.addItem(.separator())
         menu.addItem(quit)
         item.menu = menu
@@ -50,7 +54,8 @@ final class StatusItemController {
 
     func relocalize() {
         menu.items[0].title = env.L("Tray_Show")
-        menu.items[3].title = env.L("Tray_Exit")
+        menu.items[3].title = env.L("Settings_Title") + "…"
+        menu.items[5].title = env.L("Tray_Exit")
     }
 
     // MARK: - Drawing
@@ -96,5 +101,6 @@ final class StatusItemController {
 
     @objc private func onShow() { showRequested() }
     @objc private func onToggle() { toggleRequested() }
+    @objc private func onSettings() { settingsRequested() }
     @objc private func onQuit() { quitRequested() }
 }

@@ -39,6 +39,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         statusItem = StatusItemController(env: env)
         statusItem.showRequested = { [weak self] in self?.mainWindow.show() }
         statusItem.toggleRequested = { [weak self] in self?.vm.trayToggle() }
+        statusItem.settingsRequested = { [weak self] in
+            self?.mainWindow.show()
+            self?.vm.openSettings()
+        }
         statusItem.quitRequested = { [weak self] in self?.quit() }
 
         vm.$snap

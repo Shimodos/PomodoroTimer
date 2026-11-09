@@ -41,24 +41,26 @@ struct MainView: View {
     // MARK: - Title row
 
     private var titleRow: some View {
-        HStack(spacing: 8) {
-            // Traffic lights live on the left; leave room for them.
-            Spacer().frame(width: 62)
-            Circle().fill(theme.accent(for: vm.snap.activePhase)).frame(width: 10, height: 10)
+        ZStack {
+            // Centered name with the active-phase dot; nothing in compact mode.
             if !compact {
-                Text("Pomodoro")
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundColor(theme.textMuted)
+                HStack(spacing: 8) {
+                    Circle().fill(theme.accent(for: vm.snap.activePhase)).frame(width: 10, height: 10)
+                    Text("Pomodoro")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(theme.textMuted)
+                }
             }
-            Spacer()
-            TitleIconButton(symbol: vm.isTopmost ? "pin.fill" : "pin", tint: vm.isTopmost ? theme.accent : nil,
-                            help: L.get("Tip_Pin"), action: vm.toggleTopmost)
-            TitleIconButton(symbol: compact ? "arrow.up.left.and.arrow.down.right" : "arrow.down.right.and.arrow.up.left",
-                            help: L.get(compact ? "Tip_Normal" : "Tip_Compact"), action: vm.toggleCompact)
-            TitleIconButton(symbol: "gearshape", help: L.get("Tip_Settings"), action: vm.openSettings)
+            HStack(spacing: 8) {
+                Spacer()
+                TitleIconButton(symbol: vm.isTopmost ? "pin.fill" : "pin", tint: vm.isTopmost ? theme.accent : nil,
+                                help: L.get("Tip_Pin"), action: vm.toggleTopmost)
+                TitleIconButton(symbol: compact ? "arrow.up.left.and.arrow.down.right" : "arrow.down.right.and.arrow.up.left",
+                                help: L.get(compact ? "Tip_Normal" : "Tip_Compact"), action: vm.toggleCompact)
+                TitleIconButton(symbol: "gearshape", help: L.get("Tip_Settings"), action: vm.openSettings)
+            }
+            .padding(.trailing, 8)
         }
-        .padding(.leading, 14)
-        .padding(.trailing, 8)
         .frame(height: 44)
     }
 

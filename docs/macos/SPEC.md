@@ -268,8 +268,9 @@ follow the engine
 
 ### 7.2 Title row (44 pt)
 
-Left, after the traffic lights: a 10 pt dot filled with the **active** phase's accent (always, even in
-compact mode), then "Pomodoro" (13 pt, semibold, muted; hidden in compact mode).
+Centered: a 10 pt dot filled with the **active** phase's accent, then "Pomodoro" (13 pt, semibold,
+muted). Both are hidden in compact mode (macOS decision: the traffic lights already occupy the left,
+so the Windows left-aligned title would sit off-center; the compact window keeps only the buttons).
 Right: three 28-pt icon buttons: pin (tinted with the accent when `AlwaysOnTop`), compact / normal
 (tooltips `Tip_Compact` / `Tip_Normal`), settings (`Tip_Settings`). The Windows minimize and close
 buttons are not reproduced; the traffic lights do that.
@@ -304,7 +305,7 @@ then the session label (12 pt, muted). Bottom margin 22 pt.
 
 ### 7.7 Compact mode
 
-Hides the tabs, the footer, the "Pomodoro" title and the status line; shrinks the ring, time and
+Hides the tabs, the footer, the "Pomodoro" title with its dot and the status line; shrinks the ring, time and
 primary button as above; resizes the window to 250 × 300 keeping the **top-left** corner in place.
 Editing is not available in compact mode and is cancelled when entering it. Persisted in `CompactMode`.
 
@@ -424,7 +425,8 @@ Replaces the Windows tray icon. An `NSStatusItem` of variable length in the syst
   Re-rendered only when minutes, running state or accent changed.
 - **Tooltip**: `"Pomodoro — <phase title> <mm:ss>"`, or `Tray_AllDone` when finished.
 - **Menu** (opens on click): `Tray_Show`, `Start` / `Pause` (whichever applies, toggles the engine
-  and logs `UI: tray toggle`), separator, `Tray_Exit`. Captions follow the current language.
+  and logs `UI: tray toggle`), separator, `Settings_Title…` (shows the main window and opens the
+  settings window), separator, `Tray_Exit`. Captions follow the current language.
 
 The app also has the standard macOS main menu: application menu with Settings… (⌘,) and Quit (⌘Q),
 Window menu with Minimize (⌘M) and Close (⌘W).
@@ -545,7 +547,8 @@ and the status is "not registered", register again. If the status is "requires a
 | Windows | macOS |
 |---|---|
 | Borderless window with own minimize / close buttons | Native window chrome with traffic lights; pin, compact and settings buttons stay in the title row |
-| Tray icon, left click shows the window, right click opens the menu | Menu bar item, click opens the menu whose first entry is "Show"; the Dock icon also shows the window |
+| Tray icon, left click shows the window, right click opens the menu | Menu bar item, click opens the menu: Show, Start/Pause, Settings…, Quit; the Dock icon also shows the window |
+| Title "Pomodoro" with the phase dot at the left of the title bar, dot kept in compact mode | Centered after the traffic lights; hidden entirely in compact mode |
 | Balloon notification from the tray icon | User Notifications banner |
 | "Start with Windows" via the Run registry key | Login item via `SMAppService`, may require user approval |
 | Fluent icons (Segoe) | SF Symbols |
