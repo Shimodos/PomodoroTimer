@@ -10,6 +10,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var vm: MainViewModel!
     private var mainWindow: MainWindowController!
     private var statusItem: StatusItemController!
+    private var sound: SoundPlayer!
     private var subscriptions = Set<AnyCancellable>()
 
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -19,10 +20,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         theme = Theme()
         theme.apply(env.current)
 
+        sound = SoundPlayer(log: { [weak self] in self?.env.activityLog.write($0) })
+
         vm = MainViewModel(env: env, theme: theme)
-        vm.onSettingsRequested = { [weak self] in
-            self?.env.activityLog.write("UI: settings requested (window arrives in phase 3)")
-        }
+        vm.playSound = { [weak self] file, volume in self?.sound.play(file, volume: volume) }
+        vm.onSettingsRequested = { [weak self] in self?.showSettings() }
 
         installMainMenu()
 
@@ -92,6 +94,31 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @objc private func openSettings() { vm.openSettings() }
+
+    // MARK: - Settings window (SPEC §8)
+
+    private var settingsOpen = false
+
+    private func showSettings() {
+        guard !settingsOpen else { return }
+        settingsOpen = true
+        defer { settingsOpen = false }
+
+        let settingsVM = SettingsViewModel(env: env, theme: theme, player: sound)
+        settingsVM.onLanguageChanged = { [weak self] in self?.relocalize() }
+        let controller = SettingsWindowController(vm: settingsVM, theme: theme)
+        if controller.run(over: mainWindow.window) {
+            vm.applySettings()
+        }
+        relocalize()
+    }
+
+    /// Re-renders every language-dependent string outside SwiftUI bodies.
+    private func relocalize() {
+        vm.refresh()
+        statusItem.relocalize()
+        installMainMenu()
+    }
 }
 
 extension NSColor {
