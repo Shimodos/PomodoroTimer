@@ -52,7 +52,8 @@ POMODORO_DATA_DIR=/tmp/pomo make run
 
 `make test` гоняет юнит-тесты логики на Swift Testing (движок, расписание, настройки, локализация,
 цвета, тексты сессий, логи).
-`make run` собирает `macos/build/Pomodoro.app` и открывает его. `make dmg` делает установщик
+`make run` собирает `macos/build/Pomodoro.app` и открывает его. `open build/Pomodoro.app --args --settings`
+сразу открывает окно настроек. `make dmg` делает установщик
 `build/Pomodoro-<версия>-macos.dmg` с окном «Install Pomodoro → Applications»
 ([скриншот](screenshots/dmg-installer.png)). Переменная `POMODORO_DATA_DIR`
 уводит настройки и логи в отдельную папку, чтобы не трогать настоящие

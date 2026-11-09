@@ -60,6 +60,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         installSpaceKey()
 
         NSApp.activate(ignoringOtherApps: true)
+
+        // `open Pomodoro.app --args --settings` opens the settings window right away (manual checks).
+        if CommandLine.arguments.contains("--settings") {
+            RunLoop.main.add(Timer(timeInterval: 0.5, repeats: false) { [weak self] _ in self?.vm.openSettings() }, forMode: .common)
+        }
     }
 
     /// Space starts / pauses when the main window is key and no text field has focus (SPEC §7.11).

@@ -33,7 +33,8 @@ MOUNT="/Volumes/$VOLNAME"
 command -v SetFile >/dev/null && SetFile -a C "$MOUNT" || true
 
 echo "==> Finder layout"
-osascript <<EOF
+# Best effort: without a Finder session (CI) the image still works, just without the layout.
+osascript <<EOF || echo "warning: Finder layout skipped"
 tell application "Finder"
     tell disk "$VOLNAME"
         open

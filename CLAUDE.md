@@ -4,8 +4,8 @@ Two native apps share this repository:
 
 | Where | What | Status |
 |---|---|---|
-| repository root (`*.csproj`, `Models/`, `Services/`, `Views/`, …) | Windows app, C# / WPF, .NET 8 | shipped, v1.0.1, the reference implementation |
-| `macos/` | macOS app, Swift, AppKit + SwiftUI | in progress; see `docs/macos/` |
+| repository root (`*.csproj`, `Models/`, `Services/`, `Views/`, …) | Windows app, C# / WPF, .NET 8 | shipped, v1.0.2, the reference implementation |
+| `macos/` | macOS app, Swift, AppKit + SwiftUI | feature-complete port of 1.0.2; see `docs/macos/` |
 
 Shared between them, do not duplicate: `Sounds/` (built-in alerts), `Assets/app-256.png` (icon source),
 `Localization/Strings.{en,uk,ru}.xaml` (strings; the Mac build converts them to JSON).
@@ -16,6 +16,8 @@ Shared between them, do not duplicate: `Sounds/` (built-in alerts), `Assets/app-
 - Behaviour comes from the Windows code, API facts from developer.apple.com. Do not guess either.
 - Touch only `macos/` and `docs/macos/`. The Windows sources, sounds, assets and XAML strings are read-only for this work.
 - Build and run through `make app` / `make run` in `macos/` (a real `.app` bundle); `swift run` is not supported.
+- `make test` uses Swift Testing (XCTest needs Xcode, which may be absent). `open build/Pomodoro.app --args --settings` opens the settings window at launch for manual checks.
+- Interactive checks need a real mouse: SwiftUI inside `NSApp.runModal` and events synthesized in-process behave differently from the user's clicks. Ask the user to click, do not fake it.
 - Test runs use `POMODORO_DATA_DIR=/tmp/pomo` so the user's real settings stay untouched.
 - Keep `settings.json` compatible: same keys, same defaults, same meaning.
 

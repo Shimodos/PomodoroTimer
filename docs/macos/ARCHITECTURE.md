@@ -212,6 +212,9 @@ mirroring a Windows behaviour:
   → `#FF6B6B`; blend values for hover/pressed.
 - **SessionText**: the label examples in SPEC §6.4.
 
+`open build/Pomodoro.app --args --settings` opens the settings window right after launch, handy for
+checking a language or theme in both windows at once.
+
 Manual checklist for the windows (run with a scratch data dir: `POMODORO_DATA_DIR=/tmp/pomo make run`):
 
 1. Launch: 25:00, Focus tab, four dots, `‹ 4 sessions ›`, label `Session 1 of 4 · 1 h 55 min left · until HH:mm`.
@@ -225,6 +228,20 @@ Manual checklist for the windows (run with a scratch data dir: `POMODORO_DATA_DI
 8. "Open at login" → the item appears in System Settings → Login Items (approval hint when required).
 9. Quit, relaunch: position, compact mode and settings restored; `activity.log` has the expected lines.
 10. Copy a Windows `settings.json` into the data dir → same values on screen.
+
+Status after phase 5 (2026-11-09, macOS 27, Command Line Tools only):
+
+| # | Result |
+|---|---|
+| 1, 2, 3, 5 | checked through scripted view-model calls and screenshots; buttons also clicked by the user |
+| 4 | checked live with a 1-minute focus: sound, banner, pop-up from hidden, auto-started break |
+| 6 | pages, live preview, Cancel revert and Save checked; the custom-MP3 open panel only by code review |
+| 7 | checked (hide on close / minimize, Show from the menu bar item, quit when close-to-menu-bar is off only by code review) |
+| 8 | **not checked**: registering a dev build as a login item was deliberately not done on the developer's Mac |
+| 9 | position, compact mode and settings restore checked; `activity.log` lines match Windows |
+| 10 | checked with the decoding test on a Windows-shaped file; not with a real file from a Windows machine |
+| — | Theme = System follows the system appearance live (toggled through System Events); en / uk / ru verified on both windows |
+| — | Space, ⌘-shortcuts and window dragging need a real keyboard / mouse: **not checked by the port author** |
 
 ## 7. Development loop with Claude Code
 
