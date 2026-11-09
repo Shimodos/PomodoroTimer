@@ -13,8 +13,8 @@ Claude Code, не глядя в Windows-код руками. Windows-прило�
 ## Что нужно на MacBook
 
 1. macOS 13 Ventura или новее.
-2. Xcode 15+ из App Store (нужен ради Swift и SDK; саму IDE открывать не придётся). После установки
-   один раз: `sudo xcodebuild -license accept`.
+2. Xcode 15+ **или** только Command Line Tools (`xcode-select --install`). Проверено: Command Line
+   Tools достаточно для сборки, тестов и `.app`; Xcode ставить не обязательно.
 3. Git и SSH-ключ, добавленный в GitHub (репозиторий клонируется по `git@github.com:Shimodos/PomodoroTimer.git`).
 4. Claude Code, установленный по официальной инструкции с claude.com/claude-code.
 
@@ -48,7 +48,8 @@ make test
 POMODORO_DATA_DIR=/tmp/pomo make run
 ```
 
-`make test` гоняет юнит-тесты логики (движок, расписание, настройки, локализация, цвета).
+`make test` гоняет юнит-тесты логики на Swift Testing (движок, расписание, настройки, локализация,
+цвета, тексты сессий, логи).
 `make run` собирает `macos/build/Pomodoro.app` и открывает его. Переменная `POMODORO_DATA_DIR`
 уводит настройки и логи в отдельную папку, чтобы не трогать настоящие
 (`~/Library/Application Support/PomodoroTimer/`). Ручной чек-лист из десяти пунктов — в
