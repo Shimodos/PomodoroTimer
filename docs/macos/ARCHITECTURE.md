@@ -148,6 +148,11 @@ inside the windows.
 `make run` = `make app` then `open build/Pomodoro.app`. `make test` = `swift test` (plus the
 Command Line Tools flags described in §2 when Xcode is absent).
 `make zip` = `ditto -c -k --keepParent build/Pomodoro.app build/Pomodoro-<version>-macos.zip`.
+`make dmg` = `scripts/dmg.sh`: a drag-to-Applications disk image, `build/Pomodoro-<version>-macos.dmg`.
+The script stages the app, an `Applications` symlink and a background drawn by
+`scripts/dmg-background.swift` ("Install Pomodoro · Drag to Applications", arrow between the two
+icon slots), creates a read-write image, scripts Finder to set icon view / 128-pt icons / positions /
+background, then compresses to UDZO. Scripting Finder asks for Automation permission once.
 
 Why a bundle and not `swift run`: `UNUserNotificationCenter` aborts in a process that is not inside
 an `.app` bundle (`bundleProxyForCurrentProcess is nil`), the icon and the Dock name come from the
@@ -230,7 +235,7 @@ Manual checklist for the windows (run with a scratch data dir: `POMODORO_DATA_DI
 ## 8. Release (later)
 
 A second workflow, `.github/workflows/release-macos.yml`, on the same `v*` tags, runner `macos-14`:
-`make app VERSION=<tag>` → `make zip` → `gh release upload <tag> build/Pomodoro-<ver>-macos.zip`
+`make app VERSION=<tag>` → `make zip` (and `make dmg`) → `gh release upload <tag> build/Pomodoro-<ver>-macos.zip build/Pomodoro-<ver>-macos.dmg`
 (the Windows workflow creates the release; make the Mac job wait for it or use `--clobber`).
 
 Without an Apple Developer ID the zip is ad-hoc signed and not notarized: Gatekeeper will refuse the

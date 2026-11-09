@@ -4,6 +4,7 @@
 #   make run     make app, then open the bundle
 #   make test    swift test (PomodoroCore unit tests, Swift Testing)
 #   make zip     build/Pomodoro-<version>-macos.zip
+#   make dmg     build/Pomodoro-<version>-macos.dmg (drag-to-Applications installer)
 #   make clean   remove build/ and .build/
 #
 # VERSION=1.2.3 overrides the version written into Info.plist (default: git describe).
@@ -27,7 +28,7 @@ else
 TEST_FLAGS :=
 endif
 
-.PHONY: app run test zip clean
+.PHONY: app run test zip dmg clean
 
 app:
 	VERSION="$(VERSION)" CODESIGN_IDENTITY="$(CODESIGN_IDENTITY)" sh scripts/bundle.sh
@@ -43,6 +44,9 @@ zip: app
 	rm -f "build/Pomodoro-$$ver-macos.zip"; \
 	ditto -c -k --keepParent build/Pomodoro.app "build/Pomodoro-$$ver-macos.zip"; \
 	echo "build/Pomodoro-$$ver-macos.zip"
+
+dmg: app
+	sh scripts/dmg.sh
 
 clean:
 	rm -rf build .build
