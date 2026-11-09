@@ -11,6 +11,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var mainWindow: MainWindowController!
     private var statusItem: StatusItemController!
     private var sound: SoundPlayer!
+    private var notifier: Notifier!
+    private var keyMonitor: Any?
     private var subscriptions = Set<AnyCancellable>()
 
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -21,9 +23,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         theme.apply(env.current)
 
         sound = SoundPlayer(log: { [weak self] in self?.env.activityLog.write($0) })
+        notifier = Notifier(log: { [weak self] in self?.env.activityLog.write($0) })
+        installCrashHandler()
 
         vm = MainViewModel(env: env, theme: theme)
         vm.playSound = { [weak self] file, volume in self?.sound.play(file, volume: volume) }
+        vm.notify = { [weak self] title, body in self?.notifier.notify(title: title, body: body) }
         vm.onSettingsRequested = { [weak self] in self?.showSettings() }
 
         installMainMenu()
@@ -45,6 +50,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                     accent: self.theme.accentRGB(for: snap.activePhase), tooltip: snap.trayTooltip)
             }
             .store(in: &subscriptions)
+
+        if env.current.notificationsEnabled { notifier.requestAuthorizationIfNeeded() }
+        LoginItem.syncAtLaunch(env.current.startWithWindows, log: env.activityLog.write)
+        installSpaceKey()
 
         NSApp.activate(ignoringOtherApps: true)
     }
@@ -105,10 +114,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         defer { settingsOpen = false }
 
         let settingsVM = SettingsViewModel(env: env, theme: theme, player: sound)
+        if LoginItem.requiresApproval { settingsVM.loginApprovalHint = env.L("Login_Approval") }
         settingsVM.onLanguageChanged = { [weak self] in self?.relocalize() }
         let controller = SettingsWindowController(vm: settingsVM, theme: theme)
         if controller.run(over: mainWindow.window) {
             vm.applySettings()
+            if env.current.notificationsEnabled { notifier.requestAuthorizationIfNeeded() }
+            LoginItem.apply(env.current.startWithWindows, log: env.activityLog.write)
         }
         relocalize()
     }

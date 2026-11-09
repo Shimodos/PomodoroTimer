@@ -2,6 +2,17 @@ import AppKit
 import SwiftUI
 import PomodoroCore
 
+/// Main window class: "minimize to the menu bar" hides instead of miniaturizing (SPEC §7.8).
+final class MainWindow: NSWindow {
+    /// Returns true when the minimize was turned into a hide.
+    var onMiniaturize: () -> Bool = { false }
+
+    override func miniaturize(_ sender: Any?) {
+        if onMiniaturize() { return }
+        super.miniaturize(sender)
+    }
+}
+
 /// The main window: fixed size (340 × 540, compact 250 × 300), transparent title bar,
 /// SwiftUI content, always-on-top level, compact resize anchored at the top-left,
 /// position persistence, hide-on-close (SPEC §7).
@@ -9,7 +20,7 @@ final class MainWindowController: NSObject, NSWindowDelegate {
     static let normalSize = NSSize(width: 340, height: 540)
     static let compactSize = NSSize(width: 250, height: 300)
 
-    let window: NSWindow
+    let window: MainWindow
     private let vm: MainViewModel
     private let env: AppEnvironment
     private var exiting = false
@@ -19,7 +30,7 @@ final class MainWindowController: NSObject, NSWindowDelegate {
         self.env = env
 
         let size = vm.isCompact ? MainWindowController.compactSize : MainWindowController.normalSize
-        window = NSWindow(
+        window = MainWindow(
             contentRect: NSRect(origin: .zero, size: size),
             styleMask: [.titled, .closable, .miniaturizable, .fullSizeContentView],
             backing: .buffered,
@@ -34,6 +45,11 @@ final class MainWindowController: NSObject, NSWindowDelegate {
         window.isReleasedWhenClosed = false
         window.standardWindowButton(.zoomButton)?.isEnabled = false
         window.delegate = self
+        window.onMiniaturize = { [weak self] in
+            guard let self, self.env.current.minimizeToTray else { return false }
+            self.hide()
+            return true
+        }
 
         let root = MainView(vm: vm).environmentObject(theme)
         let hosting = NSHostingView(rootView: root)
@@ -137,16 +153,5 @@ final class MainWindowController: NSObject, NSWindowDelegate {
         }
         NSApp.terminate(nil)
         return false
-    }
-
-    func windowWillMiniaturize(_ notification: Notification) {
-        // "Minimize to the menu bar": hide instead of sending to the Dock (phase 4 refines).
-        if env.current.minimizeToTray {
-            DispatchQueue.main.async { [weak self] in
-                guard let self else { return }
-                self.window.deminiaturize(nil)
-                self.hide()
-            }
-        }
     }
 }
