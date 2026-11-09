@@ -132,23 +132,26 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     // MARK: - Settings window (SPEC §8)
 
-    private var settingsOpen = false
+    private var settingsController: SettingsWindowController?
 
     private func showSettings() {
-        guard !settingsOpen else { return }
-        settingsOpen = true
-        defer { settingsOpen = false }
+        guard settingsController == nil else { return }
 
         let settingsVM = SettingsViewModel(env: env, theme: theme, player: sound)
         if LoginItem.requiresApproval { settingsVM.loginApprovalHint = env.L("Login_Approval") }
         settingsVM.onLanguageChanged = { [weak self] in self?.relocalize() }
         let controller = SettingsWindowController(vm: settingsVM, theme: theme)
-        if controller.run(over: mainWindow.window) {
-            vm.applySettings()
-            if env.current.notificationsEnabled { notifier.requestAuthorizationIfNeeded() }
-            LoginItem.apply(env.current.startWithWindows, log: env.activityLog.write)
+        settingsController = controller
+        controller.present(over: mainWindow.window) { [weak self] saved in
+            guard let self else { return }
+            if saved {
+                self.vm.applySettings()
+                if self.env.current.notificationsEnabled { self.notifier.requestAuthorizationIfNeeded() }
+                LoginItem.apply(self.env.current.startWithWindows, log: self.env.activityLog.write)
+            }
+            self.relocalize()
+            self.settingsController = nil
         }
-        relocalize()
     }
 
     /// Re-renders every language-dependent string outside SwiftUI bodies.

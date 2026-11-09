@@ -9,7 +9,7 @@ private final class SettingsWindow: NSWindow {
 }
 
 /// The modal settings window (SPEC §8.1): 600 × 680, not resizable, centered over the main
-/// window, run with `NSApp.runModal` so the main window ignores clicks while it is open.
+/// window; while it is open the main window ignores mouse input (see `present`).
 final class SettingsWindowController: NSObject, NSWindowDelegate {
     private let vm: SettingsViewModel
     private let window: SettingsWindow
@@ -29,7 +29,8 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         window.title = vm.L.get("Settings_Title")
         window.titleVisibility = .hidden
         window.titlebarAppearsTransparent = true
-        window.isMovableByWindowBackground = true
+        // Dragging by the background would swallow clicks on SwiftUI controls; the title bar still drags.
+        window.isMovableByWindowBackground = false
         window.isReleasedWhenClosed = false
         window.delegate = self
         window.onCancel = { [weak self] in self?.cancel() }
@@ -43,35 +44,49 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         window.setContentSize(size)
     }
 
-    /// Shows the window modally, centered over `parent`. Returns true when saved.
-    func run(over parent: NSWindow?) -> Bool {
+    private var parent: NSWindow?
+    private var completion: ((Bool) -> Void)?
+
+    /// Shows the window centered over `parent` and blocks the parent's mouse input until it closes.
+    /// Not `NSApp.runModal`: SwiftUI controls do not get real mouse events reliably inside a modal
+    /// run loop. `completion(true)` means Save.
+    func present(over parent: NSWindow?, completion: @escaping (Bool) -> Void) {
+        self.parent = parent
+        self.completion = completion
         if let parent {
             let p = parent.frame
-            let origin = NSPoint(x: p.midX - window.frame.width / 2, y: p.midY - window.frame.height / 2)
             var frame = window.frame
-            frame.origin = origin
+            frame.origin = NSPoint(x: p.midX - frame.width / 2, y: p.midY - frame.height / 2)
             window.setFrameOrigin(window.constrainFrameRect(frame, to: parent.screen ?? NSScreen.main).origin)
+            parent.ignoresMouseEvents = true
         } else {
             window.center()
         }
         window.level = (parent?.level ?? .normal) == .floating ? .floating : .normal
         result = false
-        NSApp.runModal(for: window)
+        window.makeKeyAndOrderFront(nil)
+        NSApp.activate(ignoringOtherApps: true)
+    }
+
+    private func finish() {
+        parent?.ignoresMouseEvents = false
         window.orderOut(nil)
-        return result
+        parent?.makeKeyAndOrderFront(nil)
+        let done = completion
+        completion = nil
+        done?(result)
     }
 
     func save() {
         vm.save()
         result = true
-        NSApp.stopModal()
+        finish()
     }
-
 
     private func cancel() {
         vm.revertPreview()
         result = false
-        NSApp.stopModal()
+        finish()
     }
 
     func windowShouldClose(_ sender: NSWindow) -> Bool {

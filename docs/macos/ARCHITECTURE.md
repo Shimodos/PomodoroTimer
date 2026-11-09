@@ -96,8 +96,11 @@ simple and avoids the `Bundle.module` lookup inside a hand-made `.app`.
 - `MainWindowController` — `NSWindow` subclass (`miniaturize` override for "minimize to menu bar"),
   `NSWindowDelegate` (`windowShouldClose`, `windowDidMove`), `NSHostingView(rootView: MainView(vm))`,
   compact resizing anchored at the top-left, level `.floating` / `.normal`, `popUp()`.
-- `SettingsWindowController` — modal window hosting `SettingsView` over a `SettingsViewModel` that
-  edits a draft copy; live preview of theme/accents/language; `Cancel` reverts.
+- `SettingsWindowController` — window hosting `SettingsView` over a `SettingsViewModel` that edits
+  a draft copy; live preview of theme/accents/language; `Cancel` reverts. Presented as a plain
+  window while the main window has `ignoresMouseEvents = true`, **not** with `NSApp.runModal`:
+  SwiftUI controls did not receive real mouse clicks inside the modal run loop (synthetic events
+  posted from inside the process did work, which hid the bug in scripted tests).
 - `Theme: ObservableObject` — current palette (light/dark), focus/break accents, the "viewed phase"
   switch; sets `NSApp.appearance` (`nil` for System, `.darkAqua`, `.aqua`); observes
   `NSApplication.shared.effectiveAppearance` with KVO to follow the system.
