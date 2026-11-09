@@ -7,10 +7,15 @@ macOS: Swift, AppKit + SwiftUI, тот же таймер, те же настро
 **Сайт:** https://shimodos.github.io/pomodoro-site/ · [English version](README.md)
 
 <p align="center">
-  <img src="docs/screenshots/main-light.png" width="300" alt="Фокус, светлая тема">
+  <img src="docs/screenshots/main-light.png" width="280" alt="Windows: фокус, светлая тема">
   &nbsp;&nbsp;
-  <img src="docs/screenshots/main-dark-break-view.png" width="300" alt="Просмотр перерыва во время фокуса, тёмная тема">
+  <img src="docs/macos/screenshots/main-light-focus.png" width="280" alt="macOS: фокус, светлая тема">
+  &nbsp;&nbsp;
+  <img src="docs/screenshots/main-dark-break-view.png" width="280" alt="Windows: просмотр перерыва во время фокуса, тёмная тема">
 </p>
+<p align="center"><sub>Windows · macOS · Windows (тёмная)</sub></p>
+
+**Есть для Windows 10 / 11 и macOS 13+.** Обе версии живут в этом репозитории и выходят одним релизом.
 
 ## Скачать
 

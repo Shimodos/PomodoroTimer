@@ -7,10 +7,15 @@ memory. macOS: Swift, AppKit + SwiftUI, the same timer, settings file and look (
 **Website:** https://shimodos.github.io/pomodoro-site/ · [Русская версия](README.ru.md)
 
 <p align="center">
-  <img src="docs/screenshots/main-light.png" width="300" alt="Focus session, light theme">
+  <img src="docs/screenshots/main-light.png" width="280" alt="Windows: focus session, light theme">
   &nbsp;&nbsp;
-  <img src="docs/screenshots/main-dark-break-view.png" width="300" alt="Looking at the break tab while focus runs, dark theme">
+  <img src="docs/macos/screenshots/main-light-focus.png" width="280" alt="macOS: focus session, light theme">
+  &nbsp;&nbsp;
+  <img src="docs/screenshots/main-dark-break-view.png" width="280" alt="Windows: looking at the break tab while focus runs, dark theme">
 </p>
+<p align="center"><sub>Windows · macOS · Windows (dark)</sub></p>
+
+**Available for Windows 10 / 11 and macOS 13+.** Both versions are in this repository and ship from the same release.
 
 ## Download
 
