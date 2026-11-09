@@ -1,72 +1,68 @@
 import AppKit
+import Combine
 import PomodoroCore
 
-/// Phase 1 skeleton: loads settings and strings, logs the launch, shows an empty
-/// 340 × 540 window and puts the item in the menu bar. Windows, views, notifications
-/// and sounds arrive in the next phases.
+/// Wires settings, strings, theme, view model, main window and the menu bar item together.
+/// Settings window (phase 3), notifications, sounds and login item (phase 4) come later.
 final class AppDelegate: NSObject, NSApplicationDelegate {
     private var env: AppEnvironment!
-    private var window: NSWindow!
+    private var theme: Theme!
+    private var vm: MainViewModel!
+    private var mainWindow: MainWindowController!
     private var statusItem: StatusItemController!
+    private var subscriptions = Set<AnyCancellable>()
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         env = AppEnvironment()
         env.activityLog.write("App start v\(env.version) data=\(env.paths.dataDir.path)")
 
+        theme = Theme()
+        theme.apply(env.current)
+
+        vm = MainViewModel(env: env, theme: theme)
+        vm.onSettingsRequested = { [weak self] in
+            self?.env.activityLog.write("UI: settings requested (window arrives in phase 3)")
+        }
+
         installMainMenu()
 
-        window = makeMainWindow()
-        window.center()
-        window.makeKeyAndOrderFront(nil)
+        mainWindow = MainWindowController(vm: vm, theme: theme, env: env)
+        mainWindow.show()
 
         statusItem = StatusItemController(env: env)
-        statusItem.showRequested = { [weak self] in self?.showWindow() }
-        statusItem.quitRequested = { NSApp.terminate(nil) }
-        statusItem.update(minutes: env.current.workMinutes, running: false, finished: false,
-                          accent: AccentMath.focusAccent(env.current), tooltip: "Pomodoro")
+        statusItem.showRequested = { [weak self] in self?.mainWindow.show() }
+        statusItem.toggleRequested = { [weak self] in self?.vm.trayToggle() }
+        statusItem.quitRequested = { [weak self] in self?.quit() }
+
+        vm.$snap
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] snap in
+                guard let self else { return }
+                self.statusItem.update(
+                    minutes: snap.minutesLeft, running: snap.isRunning, finished: snap.isFinished,
+                    accent: self.theme.accentRGB(for: snap.activePhase), tooltip: snap.trayTooltip)
+            }
+            .store(in: &subscriptions)
 
         NSApp.activate(ignoringOtherApps: true)
     }
 
     func applicationWillTerminate(_ notification: Notification) {
+        mainWindow?.prepareForExit()
         env.activityLog.write("App exit")
         env.settings.save()
+        statusItem?.remove()
         env.activityLog.flush()
     }
 
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
-        showWindow()
+        mainWindow.show()
         return false
     }
 
-    // MARK: - Window
-
-    private func makeMainWindow() -> NSWindow {
-        let size = NSSize(width: 340, height: 540)
-        let w = NSWindow(
-            contentRect: NSRect(origin: .zero, size: size),
-            styleMask: [.titled, .closable, .miniaturizable, .fullSizeContentView],
-            backing: .buffered,
-            defer: false
-        )
-        w.title = "Pomodoro"
-        w.titleVisibility = .hidden
-        w.titlebarAppearsTransparent = true
-        w.isMovableByWindowBackground = true
-        w.isReleasedWhenClosed = false
-        w.setContentSize(size)
-        w.contentMinSize = size
-        w.contentMaxSize = size
-
-        let palette = ThemePalette.dark
-        w.backgroundColor = NSColor(rgb: palette.windowBg)
-        return w
-    }
-
-    private func showWindow() {
-        if window.isMiniaturized { window.deminiaturize(nil) }
-        window.makeKeyAndOrderFront(nil)
-        NSApp.activate(ignoringOtherApps: true)
+    private func quit() {
+        mainWindow.prepareForExit()
+        NSApp.terminate(nil)
     }
 
     // MARK: - Main menu
@@ -75,7 +71,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let main = NSMenu()
 
         let appMenu = NSMenu()
-        appMenu.addItem(withTitle: "Quit Pomodoro", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
+        let settings = NSMenuItem(title: env.L("Settings_Title") + "…", action: #selector(openSettings), keyEquivalent: ",")
+        settings.target = self
+        appMenu.addItem(settings)
+        appMenu.addItem(.separator())
+        appMenu.addItem(withTitle: env.L("Tray_Exit"), action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
         let appItem = NSMenuItem()
         appItem.submenu = appMenu
         main.addItem(appItem)
@@ -90,6 +90,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         NSApp.mainMenu = main
         NSApp.windowsMenu = windowMenu
     }
+
+    @objc private func openSettings() { vm.openSettings() }
 }
 
 extension NSColor {

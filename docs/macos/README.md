@@ -10,6 +10,8 @@ Claude Code, не глядя в Windows-код руками. Windows-прило�
 | [ARCHITECTURE.md](ARCHITECTURE.md) | Как устроен порт: Swift-пакет в `macos/`, разделение AppKit / SwiftUI, скрипт сборки `.app`, тесты, проверенные факты о macOS API, релиз |
 | [KICKOFF.md](KICKOFF.md) | Готовый промпт для Claude Code на Mac и порядок фаз |
 
+Скриншоты текущей сборки (фаза 2): [фокус](screenshots/main-light-focus.png), [вкладка Break во время фокуса](screenshots/main-light-break-view.png), [компакт](screenshots/compact-light.png), [редактор длительности](screenshots/main-light-edit.png).
+
 ## Что нужно на MacBook
 
 1. macOS 13 Ventura или новее.
