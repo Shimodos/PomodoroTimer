@@ -58,6 +58,28 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         NSApp.activate(ignoringOtherApps: true)
     }
 
+    /// Space starts / pauses when the main window is key and no text field has focus (SPEC §7.11).
+    private func installSpaceKey() {
+        keyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
+            guard let self,
+                  event.charactersIgnoringModifiers == " ",
+                  event.modifierFlags.intersection([.command, .option, .control]).isEmpty,
+                  let window = event.window, window === self.mainWindow.window, window.isKeyWindow,
+                  !(window.firstResponder is NSTextView) else { return event }
+            self.env.activityLog.write("UI: space key")
+            self.vm.togglePrimary()
+            return nil
+        }
+    }
+
+    /// SPEC §14: unhandled errors go to error.log; the app keeps running where it can.
+    private func installCrashHandler() {
+        NSSetUncaughtExceptionHandler { exception in
+            let paths = DataPaths.resolve()
+            CrashLog(paths: paths).write("\(exception.name.rawValue): \(exception.reason ?? "")\n\(exception.callStackSymbols.joined(separator: "\n"))")
+        }
+    }
+
     func applicationWillTerminate(_ notification: Notification) {
         mainWindow?.prepareForExit()
         env.activityLog.write("App exit")
