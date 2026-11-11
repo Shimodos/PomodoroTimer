@@ -65,7 +65,7 @@ jobs:
           | ``Pomodoro-$v-macos.zip`` | The same Mac app zipped. |
 
           Windows 10/11, x64: settings are stored in ``%AppData%\PomodoroTimer``.
-          macOS 13+, universal: settings in ``~/Library/Application Support/PomodoroTimer``. The Mac build is not notarized: on first launch right-click Pomodoro → Open → Open.
+          macOS 13+, universal: settings in ``~/Library/Application Support/PomodoroTimer``. The Mac build is not notarized: on first launch click Done, then System Settings → Privacy & Security → Open Anyway (once).
           The macOS files are attached a few minutes after the Windows ones by a second workflow.
           "@
           gh release create "$env:GITHUB_REF_NAME" "Pomodoro-$v-win-x64.zip" "Pomodoro-$v-win-x64-framework.zip" --title "Pomodoro $v" --notes "$notes"

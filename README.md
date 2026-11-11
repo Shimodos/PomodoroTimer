@@ -34,8 +34,10 @@ Windows 10 / 11, x64. No installer: the app keeps its settings in `%AppData%\Pom
 | `Pomodoro-<version>-macos.zip` | The same `.app` zipped. |
 
 macOS 13 Ventura or newer, Apple Silicon and Intel. The build is signed ad hoc and not notarized
-(no Apple Developer account), so the first launch is refused by Gatekeeper: right-click the app →
-**Open** → **Open**, or run `xattr -d com.apple.quarantine /Applications/Pomodoro.app` once.
+(no Apple Developer account), so the first launch shows “Apple could not verify Pomodoro.app”. Click
+**Done**, then open **System Settings → Privacy & Security**, scroll to *Security* and press
+**Open Anyway** next to Pomodoro; once is enough. Or run
+`xattr -d com.apple.quarantine /Applications/Pomodoro.app` in Terminal.
 
 ## Features
 

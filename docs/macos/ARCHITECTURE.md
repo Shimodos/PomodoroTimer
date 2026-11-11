@@ -259,6 +259,7 @@ A second workflow, `.github/workflows/release-macos.yml`, on the same `v*` tags,
 (the Windows workflow creates the release; make the Mac job wait for it or use `--clobber`).
 
 Without an Apple Developer ID the zip is ad-hoc signed and not notarized: Gatekeeper will refuse the
-downloaded app with "cannot be opened" until the user right-clicks → Open, or runs
+downloaded app with "Apple could not verify" until the user allows it in System Settings → Privacy &
+Security → Open Anyway (right-click → Open no longer works on macOS 15+), or runs
 `xattr -d com.apple.quarantine Pomodoro.app`. Document that on the release notes and the website;
 proper Developer ID signing + notarization is a separate step for when there is an account.
