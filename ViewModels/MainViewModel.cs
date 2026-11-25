@@ -47,6 +47,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private int _editMinutes = 25;
     private TimerPhase _viewedPhase = TimerPhase.Work;
     private string _dotsKey = "";
+    private System.Windows.Media.ImageSource? _windowIcon;
 
     private static AppSettings S => SettingsService.Current;
 
@@ -124,6 +125,9 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public string StatusText { get => _statusText; private set => Set(ref _statusText, value); }
     public string SessionLabel { get => _sessionLabel; private set => Set(ref _sessionLabel, value); }
     public bool IsRunning { get => _isRunning; private set => Set(ref _isRunning, value); }
+
+    /// <summary>The tray picture, larger, for the taskbar button; null until the first refresh.</summary>
+    public System.Windows.Media.ImageSource? WindowIcon { get => _windowIcon; private set => Set(ref _windowIcon, value); }
 
     /// <summary>"Focus running · 23:41" shown while looking at another tab.</summary>
     public string ActiveInfo
@@ -454,11 +458,16 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         }
 
         int minutesLeft = finished ? 0 : (int)Math.Ceiling(activeRemaining.TotalMinutes);
-        _tray.Update(
+        double activeProgress = finished || activeTotal.TotalSeconds <= 0
+            ? 0
+            : Math.Clamp(activeRemaining.TotalSeconds / activeTotal.TotalSeconds, 0, 1);
+        var icon = _tray.Update(
             finished ? "✓" : minutesLeft.ToString(),
             finished ? Localizer.Get("Tray_AllDone") : $"Pomodoro — {PhaseTitle} {activeClock}",
             _engine.Phase == TimerPhase.Work ? ThemeManager.FocusAccent : ThemeManager.BreakAccent,
-            _engine.IsRunning);
+            _engine.IsRunning,
+            activeProgress);
+        if (icon != null) WindowIcon = icon;
     }
 
     private string BuildSessionLabel(int filled, int cycles, bool finished, TimeSpan remaining)

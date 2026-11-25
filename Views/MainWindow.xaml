@@ -4,6 +4,7 @@
         xmlns:c="clr-namespace:PomodoroTimer.Controls"
         xmlns:conv="clr-namespace:PomodoroTimer.Converters"
         Title="Pomodoro"
+        Icon="{Binding WindowIcon}"
         Width="340" Height="540"
         WindowStyle="None" ResizeMode="CanMinimize"
         WindowStartupLocation="CenterScreen"

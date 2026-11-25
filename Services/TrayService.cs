@@ -1,14 +1,12 @@
 using System;
 using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Drawing.Text;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
 namespace PomodoroTimer.Services;
 
 /// <summary>
-/// Notification-area icon that shows the minutes left, plus toast notifications.
+/// Notification-area icon that shows the minutes left and a shrinking ring, plus toast notifications.
 /// Uses the WinForms NotifyIcon because WPF has no built-in tray support.
 /// </summary>
 public sealed class TrayService : IDisposable
@@ -17,6 +15,9 @@ public sealed class TrayService : IDisposable
     private readonly ToolStripMenuItem _showItem;
     private readonly ToolStripMenuItem _toggleItem;
     private readonly ToolStripMenuItem _exitItem;
+    /// <summary>Taskbar buttons are up to 48 px at 200 % scaling; 64 leaves room to downscale cleanly.</summary>
+    private const int TaskbarIconSize = 64;
+
     private IntPtr _hIcon;
     private string _lastKey = "";
     private string _startText = "Start";
@@ -58,55 +59,28 @@ public sealed class TrayService : IDisposable
         _pauseText = pause;
     }
 
-    public void Update(string label, string tooltip, System.Windows.Media.Color accent, bool running)
+    /// <param name="progress">Share of the active phase that is left, 0..1; drawn as a ring on the icon.</param>
+    /// <returns>The same picture for the taskbar button when the icon was redrawn, otherwise null.</returns>
+    public System.Windows.Media.ImageSource? Update(string label, string tooltip, System.Windows.Media.Color accent, bool running, double progress)
     {
         _toggleItem.Text = running ? _pauseText : _startText;
 
         if (tooltip.Length > 63) tooltip = tooltip[..63];
         _icon.Text = tooltip;
 
-        string key = $"{label}|{running}|{accent}";
-        if (key == _lastKey) return;
+        progress = StatusIcon.Quantize(progress);
+        string key = $"{label}|{running}|{accent}|{progress}";
+        if (key == _lastKey) return null;
         _lastKey = key;
 
-        using var bmp = new Bitmap(32, 32);
-        using (var g = Graphics.FromImage(bmp))
-        {
-            g.SmoothingMode = SmoothingMode.AntiAlias;
-            g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
-            g.Clear(Color.Transparent);
-
-            var accentColor = Color.FromArgb(accent.R, accent.G, accent.B);
-            var rect = new RectangleF(1.5f, 1.5f, 29, 29);
-
-            if (running)
-            {
-                using var fill = new SolidBrush(accentColor);
-                g.FillEllipse(fill, rect);
-            }
-            else
-            {
-                using var fill = new SolidBrush(Color.FromArgb(60, 60, 68));
-                using var pen = new Pen(accentColor, 2.5f);
-                g.FillEllipse(fill, rect);
-                g.DrawEllipse(pen, rect);
-            }
-
-            float fontSize = label.Length > 2 ? 10f : 13f;
-            using var font = new Font("Segoe UI", fontSize, FontStyle.Bold, GraphicsUnit.Pixel);
-            using var text = new SolidBrush(Color.White);
-            var format = new StringFormat
-            {
-                Alignment = StringAlignment.Center,
-                LineAlignment = StringAlignment.Center,
-            };
-            g.DrawString(label, font, text, new RectangleF(0, 0.5f, 32, 32), format);
-        }
-
+        using var bmp = StatusIcon.Render(32, label, accent, running, progress);
         var newHandle = bmp.GetHicon();
         _icon.Icon = Icon.FromHandle(newHandle);
         if (_hIcon != IntPtr.Zero) DestroyIcon(_hIcon);
         _hIcon = newHandle;
+
+        using var large = StatusIcon.Render(TaskbarIconSize, label, accent, running, progress);
+        return StatusIcon.ToImageSource(large);
     }
 
     public void Notify(string title, string text)

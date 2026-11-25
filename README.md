@@ -47,7 +47,8 @@ macOS 13 Ventura or newer, Apple Silicon and Intel. The build is signed ad hoc a
 - **Edit durations in place.** Press "Edit" under the time, type the minutes or step by ±5, hit Enter.
 - **Two accent colors.** One for focus, one for breaks, so you can tell which timer is running at a glance. The break color defaults to a matching companion of the focus color and can be picked separately.
 - **Sounds.** Eight built-in alerts (synthesized, license-free), any WAV or MP3 of your own, volume control, preview.
-- **Notifications and tray.** Windows notification when a phase ends, tray icon showing the minutes left, minimize and close to tray.
+- **Notifications and tray.** Windows notification when a phase ends, minimize and close to tray.
+- **A live icon in the tray and on the taskbar.** Both show the minutes left in the color of the running phase, with a ring that shrinks like the one in the window; a dark disc means paused.
 - **Pop up when a phase ends.** The window comes back on top of everything (even from the tray) so you never miss the end of a focus or a break. Can be switched off.
 - **Compact mode** and **always on top** for keeping the timer in a corner.
 - **Dark, light or system theme.**
@@ -63,6 +64,9 @@ macOS 13 Ventura or newer, Apple Silicon and Intel. The build is signed ad hoc a
   <img src="docs/screenshots/main-dark-break.png" width="300" alt="Break running, dark theme">
   &nbsp;&nbsp;
   <img src="docs/screenshots/compact-dark.png" width="220" alt="Compact mode">
+</p>
+<p align="center">
+  <img src="docs/screenshots/status-icons.png" width="680" alt="Tray and taskbar icon: focus, break, paused, all done">
 </p>
 
 ## Build from source
