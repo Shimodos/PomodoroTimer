@@ -418,11 +418,18 @@ Label (13 pt) on the left, switch on the right, 12 pt below each row.
 
 Replaces the Windows tray icon. An `NSStatusItem` of variable length in the system menu bar.
 
-- **Image**: drawn, not a template. A circle of 18 × 18 pt (render at 2× for Retina): when running,
-  filled with the active phase's accent; when paused, filled dark grey `#3C3C44` with a 2.5-px ring in
-  the accent. White bold text centered: the minutes left (`ceil`), or `✓` when the run is finished.
-  Font 13 px for one or two characters, 10 px for longer (in Windows' 32-px icon; scale to the point size).
-  Re-rendered only when minutes, running state or accent changed.
+- **Image**: drawn, not a template, 18 × 18 pt, the same design as `Services/StatusIcon.cs` (since
+  1.1.0), given here on its 32-unit grid; scale to the point size. Outer circle of radius 15. A ring
+  3 units wide along its edge: a track in the accent at alpha 80/255 and, over it, an arc in the full
+  accent for the share of the active phase that is left, starting at 12 o'clock and running
+  clockwise. A 1-unit gap, then a disc of radius 11: the active phase's accent when running, dark
+  grey `#3C3C44` when paused. White bold text centered on the disc: the minutes left (`ceil`), or `✓`
+  when the run is finished (no arc then). Font 13 units for one or two characters, about 10 for
+  longer; the Mac uses 14 and 10 because the system font is narrower. Re-rendered only when minutes,
+  running state, accent or the ring position (in steps of 1/60 of a turn) changed.
+- **Dock icon**: the same picture at 128 pt with a 12-pt margin replaces the Dock icon while the app
+  runs (`NSApp.applicationIconImage`), as the taskbar button does on Windows. macOS shows the
+  bundle icon again after the app quits.
 - **Tooltip**: `"Pomodoro — <phase title> <mm:ss>"`, or `Tray_AllDone` when finished.
 - **Menu** (opens on click): `Tray_Show`, `Start` / `Pause` (whichever applies, toggles the engine
   and logs `UI: tray toggle`), separator, `Settings_Title…` (shows the main window and opens the

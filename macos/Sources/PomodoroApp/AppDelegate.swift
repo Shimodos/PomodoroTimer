@@ -51,7 +51,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 guard let self else { return }
                 self.statusItem.update(
                     minutes: snap.minutesLeft, running: snap.isRunning, finished: snap.isFinished,
-                    accent: self.theme.accentRGB(for: snap.activePhase), tooltip: snap.trayTooltip)
+                    accent: self.theme.accentRGB(for: snap.activePhase),
+                    progress: snap.activeProgress, tooltip: snap.trayTooltip)
             }
             .store(in: &subscriptions)
 

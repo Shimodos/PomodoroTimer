@@ -1,9 +1,8 @@
 import AppKit
 import PomodoroCore
 
-/// The menu bar item (SPEC §9): a drawn circle with the minutes left, a tooltip and a
-/// click menu Show / Start–Pause / Quit. Phase 1 wires Show and Quit; the toggle entry
-/// gets its engine in phase 4.
+/// The menu bar item (SPEC §9): a drawn disc with the minutes left and a shrinking ring, a
+/// tooltip and a click menu Show / Start–Pause / Quit. Also keeps the Dock icon in step.
 final class StatusItemController {
     private let env: AppEnvironment
     private let item: NSStatusItem
@@ -40,13 +39,24 @@ final class StatusItemController {
         NSStatusBar.system.removeStatusItem(item)
     }
 
-    /// Re-renders the image only when minutes, running state or accent changed.
-    func update(minutes: Int, running: Bool, finished: Bool, accent: RGB, tooltip: String) {
+    /// Ring positions per full turn; the images are redrawn only when the ring moves a step.
+    static let ringSteps = 60
+
+    /// Re-renders the images only when minutes, running state, accent or the ring step changed.
+    /// The same picture, larger, replaces the Dock icon while the app runs (like the taskbar
+    /// button on Windows); macOS shows the bundle icon again after the app quits.
+    /// - Parameter progress: share of the active phase that is left, 0…1.
+    func update(minutes: Int, running: Bool, finished: Bool, accent: RGB, progress: Double, tooltip: String) {
         let text = finished ? "✓" : String(minutes)
-        let key = "\(text)|\(running)|\(accent.hex)"
+        let step = Int((min(max(progress, 0), 1) * Double(StatusItemController.ringSteps)).rounded())
+        let key = "\(text)|\(running)|\(accent.hex)|\(step)"
         if key != lastKey {
             lastKey = key
-            item.button?.image = StatusItemController.drawImage(text: text, running: running, accent: accent)
+            let left = Double(step) / Double(StatusItemController.ringSteps)
+            item.button?.image = StatusItemController.drawImage(
+                side: 18, inset: 0, text: text, running: running, accent: accent, progress: left)
+            NSApp.applicationIconImage = StatusItemController.drawImage(
+                side: 128, inset: 12, text: text, running: running, accent: accent, progress: left)
         }
         item.button?.toolTip = tooltip
         toggleEntry.title = env.L(running ? "Pause" : "Start")
@@ -60,26 +70,60 @@ final class StatusItemController {
 
     // MARK: - Drawing
 
-    /// 18 × 18 pt circle: accent fill when running; dark grey `#3C3C44` with a 2.5-px
-    /// accent ring when paused. White bold centered text (minutes or ✓).
-    static func drawImage(text: String, running: Bool, accent: RGB) -> NSImage {
-        let size = NSSize(width: 18, height: 18)
+    /// The status picture, same design as `Services/StatusIcon.cs` on Windows (a 32-unit grid):
+    /// a ring in the accent on a faint track that shrinks clockwise from 12 o'clock with the
+    /// time left, a 1-unit gap, then a disc with the minutes (or ✓) in white bold. The disc is
+    /// the accent when running and dark grey `#3C3C44` when paused.
+    /// - Parameters:
+    ///   - side: image side in points (18 for the menu bar, 128 for the Dock).
+    ///   - inset: empty margin around the drawing, in points.
+    static func drawImage(side: CGFloat, inset: CGFloat, text: String, running: Bool, accent: RGB, progress: Double) -> NSImage {
+        let size = NSSize(width: side, height: side)
         let image = NSImage(size: size, flipped: false) { rect in
+            let box = rect.insetBy(dx: inset, dy: inset)
+            let unit = box.width / 32
+            let center = NSPoint(x: box.midX, y: box.midY)
             let accentColor = NSColor(rgb: accent)
-            let circle = NSBezierPath(ovalIn: rect.insetBy(dx: 0.5, dy: 0.5))
-            if running {
-                accentColor.setFill()
-                circle.fill()
-            } else {
-                NSColor(rgb: RGB(hex: "#3C3C44")!).setFill()
-                circle.fill()
+
+            let ringWidth = 3 * unit
+            let ringRadius = 15 * unit - ringWidth / 2
+            let discRadius = 15 * unit - ringWidth - unit
+
+            let discColor = running ? accentColor : NSColor(rgb: RGB(hex: "#3C3C44")!)
+            discColor.setFill()
+            NSBezierPath(ovalIn: NSRect(
+                x: center.x - discRadius, y: center.y - discRadius,
+                width: discRadius * 2, height: discRadius * 2)).fill()
+
+            let track = NSBezierPath(ovalIn: NSRect(
+                x: center.x - ringRadius, y: center.y - ringRadius,
+                width: ringRadius * 2, height: ringRadius * 2))
+            track.lineWidth = ringWidth
+            NSColor(rgb: accent, alpha: 80.0 / 255.0).setStroke()
+            track.stroke()
+
+            // The arc is built from points instead of an arc call, so that its start (top)
+            // and direction (clockwise) depend on nothing but this math: the image is not
+            // flipped, y grows upwards, angle 0 is 12 o'clock.
+            let left = min(max(progress, 0), 1)
+            if left > 0 {
+                let arc = NSBezierPath()
+                let segments = max(1, Int((left * 120).rounded(.up)))
+                for i in 0...segments {
+                    let angle = 2 * Double.pi * left * Double(i) / Double(segments)
+                    let point = NSPoint(
+                        x: center.x + ringRadius * CGFloat(sin(angle)),
+                        y: center.y + ringRadius * CGFloat(cos(angle)))
+                    if i == 0 { arc.move(to: point) } else { arc.line(to: point) }
+                }
+                if left >= 1 { arc.close() }
+                arc.lineWidth = ringWidth
+                arc.lineJoinStyle = .round
                 accentColor.setStroke()
-                let ring = NSBezierPath(ovalIn: rect.insetBy(dx: 1.25, dy: 1.25))
-                ring.lineWidth = 1.5   // ≈ 2.5 px of the 32-px Windows icon scaled to 18 pt
-                ring.stroke()
+                arc.stroke()
             }
 
-            let fontSize: CGFloat = text.count <= 2 ? 9.5 : 7
+            let fontSize: CGFloat = (text.count <= 2 ? 14 : 10) * unit
             let paragraph = NSMutableParagraphStyle()
             paragraph.alignment = .center
             let attrs: [NSAttributedString.Key: Any] = [

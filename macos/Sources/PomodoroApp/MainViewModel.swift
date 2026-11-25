@@ -34,6 +34,8 @@ final class MainViewModel: ObservableObject {
         var activePhase: TimerPhase = .work
         var dots: [CycleDot] = []
         var minutesLeft = 25
+        /// Share of the active phase that is left (not the viewed one), for the status icons.
+        var activeProgress: Double = 1
         var trayTooltip = ""
     }
 
@@ -289,6 +291,7 @@ final class MainViewModel: ObservableObject {
         n.sessionLabel = SessionText.sessionLabel(settings: s, engine: engine, L)
 
         n.minutesLeft = SessionText.minutesLeft(remaining, finished: finished)
+        n.activeProgress = finished || total <= 0 ? 0 : min(max(remaining / total, 0), 1)
         n.trayTooltip = SessionText.trayTooltip(phase: engine.phase, remaining: remaining, finished: finished, L)
 
         snap = n

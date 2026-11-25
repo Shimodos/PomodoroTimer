@@ -1,0 +1,30 @@
+name: CI (macOS)
+
+# Builds and tests the macOS app on every push that touches it, so a change written
+# away from a Mac is known to compile before a release tag is pushed.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "macos/**"
+      - ".github/workflows/ci-macos.yml"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Toolchain
+        run: |
+          sw_vers
+          swift --version
+
+      - name: Test
+        working-directory: macos
+        run: make test
+
+      - name: Build app
+        working-directory: macos
+        run: make app VERSION=0.0.0
